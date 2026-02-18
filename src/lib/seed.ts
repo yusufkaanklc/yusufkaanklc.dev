@@ -18,7 +18,12 @@ import { Certificate } from "./models/Certificate";
 import { Contact } from "./models/Contact";
 import { Social } from "./models/Social";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/portfolio";
+const MONGODB_URI = process.env.MONGODB_URI!;
+
+if (!MONGODB_URI) {
+  console.error("Please define the MONGODB_URI environment variable inside .env");
+  process.exit(1);
+}
 
 async function seed() {
   console.log("Connecting to MongoDB...");

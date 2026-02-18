@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import { verifyPassword, signToken } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed, retryAfterSeconds } = checkRateLimit(ip);
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: `Too many attempts. Try again in ${retryAfterSeconds} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const { password } = await request.json();
 
     if (!password) {
@@ -26,7 +37,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 2, // 2 hours
       path: "/",
     });
 
