@@ -1,0 +1,20 @@
+// Import all command files to trigger their side-effect registrations
+import "./help";
+import "./about";
+import "./projects";
+import "./skills";
+import "./experience";
+import "./education";
+import "./contact";
+import "./socials";
+import "./blog";
+import "./clear";
+import "./filesystem";
+import "./whoami";
+import "./date";
+import "./history";
+import "./theme";
+import "./echo";
+import "./sudo";
+import "./neofetch";
+import "./resume";
