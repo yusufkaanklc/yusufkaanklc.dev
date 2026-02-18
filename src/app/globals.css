@@ -75,6 +75,10 @@ html, body {
   background: var(--bg-secondary);
   color: var(--fg);
   font-family: var(--font-mono), ui-monospace, "Cascadia Code", "Fira Code", monospace;
+}
+
+/* Only hide overflow on terminal page, not admin */
+body:has(.terminal-container) {
   overflow: hidden;
 }
 

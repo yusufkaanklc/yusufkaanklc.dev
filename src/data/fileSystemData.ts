@@ -1,14 +1,25 @@
 import { type DirectoryNode } from "@/types/fileSystem";
-import { profile } from "./profile";
-import { projects } from "./projects";
-import { skillCategories } from "./skills";
-import { experiences } from "./experience";
-import { educationList, certificates } from "./education";
-import { socials } from "./socials";
-import { blogPosts } from "./blog";
-import { contact } from "./contact";
+import { type SiteData } from "@/types/commands";
+import { profile as staticProfile } from "./profile";
+import { projects as staticProjects } from "./projects";
+import { skillCategories as staticSkillCategories } from "./skills";
+import { experiences as staticExperiences } from "./experience";
+import { educationList as staticEducationList, certificates as staticCertificates } from "./education";
+import { socials as staticSocials } from "./socials";
+import { blogPosts as staticBlogPosts } from "./blog";
+import { contact as staticContact } from "./contact";
 
-export function buildFileSystem(): DirectoryNode {
+export function buildFileSystem(data?: SiteData): DirectoryNode {
+  const profile = data?.profile ?? staticProfile;
+  const projects = data?.projects ?? staticProjects;
+  const skillCategories = data?.skillCategories ?? staticSkillCategories;
+  const experiences = data?.experiences ?? staticExperiences;
+  const educationList = data?.educationList ?? staticEducationList;
+  const certificates = data?.certificates ?? staticCertificates;
+  const socials = data?.socials ?? staticSocials;
+  const blogPosts = data?.blogPosts ?? staticBlogPosts;
+  const contact = data?.contact ?? staticContact;
+
   return {
     type: "directory",
     name: "~",

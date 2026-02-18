@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTerminal } from "@/hooks/useTerminal";
 import { useTheme } from "@/hooks/useTheme";
+import { useSiteData } from "@/contexts/DataContext";
 import { setFileSystemRoot } from "@/core/fileSystem";
 import { buildFileSystem } from "@/data/fileSystemData";
 import { asciiLogo, welcomeLines } from "@/data/asciiArt";
@@ -17,6 +18,7 @@ const MOBILE_COMMANDS = ["help", "about", "projects", "skills", "experience", "r
 
 export function Terminal() {
   const { theme, setTheme } = useTheme();
+  const { data, loading } = useSiteData();
   const {
     state,
     setInput,
@@ -25,7 +27,9 @@ export function Terminal() {
     handleTab,
     clear,
     addSystemLines,
-  } = useTerminal(theme, setTheme);
+    resolveInteractiveInput,
+    cancelInteractiveInput,
+  } = useTerminal(theme, setTheme, data ?? undefined);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,7 +38,11 @@ export function Terminal() {
 
   // Initialize file system and show welcome
   useEffect(() => {
-    setFileSystemRoot(buildFileSystem());
+    if (data) {
+      setFileSystemRoot(buildFileSystem(data));
+    } else {
+      setFileSystemRoot(buildFileSystem());
+    }
 
     if (!initializedRef.current) {
       initializedRef.current = true;
@@ -51,7 +59,7 @@ export function Terminal() {
         })),
       ]);
     }
-  }, [addSystemLines]);
+  }, [addSystemLines, data]);
 
   // Auto-scroll only on new lines
   useEffect(() => {
@@ -60,7 +68,17 @@ export function Terminal() {
     }
   }, [state.lines]);
 
-  // Keep input focused
+  // Refocus input when interactive mode ends
+  useEffect(() => {
+    if (!state.interactiveMode) {
+      // Small delay to let the normal input render and ref attach
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    }
+  }, [state.interactiveMode]);
+
+  // Keep input focused on click
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
@@ -80,8 +98,18 @@ export function Terminal() {
     [executeCommand]
   );
 
+  if (loading) {
+    return (
+      <div className="terminal-container flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
+        <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden glow-border transition-colors duration-300 items-center justify-center">
+          <span className="text-accent animate-pulse font-mono">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
+    <div className="terminal-container flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
       <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden glow-border transition-colors duration-300">
         <TerminalHeader currentPath={state.currentPath} />
 
@@ -107,6 +135,9 @@ export function Terminal() {
               onHistoryNav={handleHistoryNavigation}
               onTab={handleTab}
               onClear={clear}
+              interactiveMode={state.interactiveMode}
+              onInteractiveSubmit={resolveInteractiveInput}
+              onInteractiveCancel={cancelInteractiveInput}
             />
           </div>
         </div>

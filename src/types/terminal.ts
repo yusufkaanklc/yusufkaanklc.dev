@@ -1,5 +1,10 @@
 import { type TerminalOutputLine } from "./commands";
 
+export interface InteractiveMode {
+  prompt: string;
+  masked: boolean;
+}
+
 export interface TerminalLine {
   id: string;
   type: "input" | "output";
@@ -15,6 +20,7 @@ export interface TerminalState {
   history: string[];
   historyIndex: number;
   isTyping: boolean;
+  interactiveMode: InteractiveMode | null;
 }
 
 export type TerminalAction =
@@ -24,4 +30,6 @@ export type TerminalAction =
   | { type: "CLEAR" }
   | { type: "ADD_SYSTEM_LINES"; payload: TerminalOutputLine[] }
   | { type: "SET_TYPING"; payload: boolean }
-  | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" };
+  | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" }
+  | { type: "SET_INTERACTIVE_MODE"; payload: InteractiveMode | null }
+  | { type: "ADD_INPUT_LINE"; payload: { command: string; currentPath: string } };

@@ -4,7 +4,7 @@ export interface CommandDefinition {
   name: string;
   description: string;
   usage?: string;
-  handler: (args: string[], context: CommandContext) => CommandResult;
+  handler: (args: string[], context: CommandContext) => CommandResult | Promise<CommandResult>;
 }
 
 export interface CommandContext {
@@ -13,6 +13,30 @@ export interface CommandContext {
   setCurrentPath: (path: string) => void;
   theme: string;
   setTheme: (theme: string) => void;
+  requestInput: (prompt: string, masked: boolean) => Promise<string>;
+  data?: SiteData;
+}
+
+export interface SiteData {
+  profile: {
+    name: string;
+    username: string;
+    title: string;
+    bio: string;
+    location: string;
+    email: string;
+    phone: string;
+    website: string;
+    resumeUrl: string;
+  };
+  projects: { _id?: string; name: string; description: string; tech: string[]; url?: string; github?: string }[];
+  blogPosts: { _id?: string; title: string; date: string; summary: string; content?: string; url?: string }[];
+  skillCategories: { _id?: string; name: string; skills: string[] }[];
+  experiences: { _id?: string; role: string; company: string; location: string; period: string; description: string }[];
+  educationList: { _id?: string; degree: string; school: string; period: string; description?: string }[];
+  certificates: { _id?: string; name: string; issuer: string }[];
+  contact: { email: string; phone: string; location: string; availability: string };
+  socials: { _id?: string; name: string; url: string; icon: string }[];
 }
 
 export interface CommandResult {

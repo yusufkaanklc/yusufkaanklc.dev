@@ -1,8 +1,8 @@
 "use client";
 
-import { useReducer, useCallback } from "react";
+import { useReducer, useCallback, useRef } from "react";
 import { type TerminalState, type TerminalAction, type TerminalLine } from "@/types/terminal";
-import { type TerminalOutputLine, type CommandContext } from "@/types/commands";
+import { type TerminalOutputLine, type CommandContext, type SiteData } from "@/types/commands";
 import { parseCommand } from "@/core/commandParser";
 import { getCommand } from "@/core/commandRegistry";
 import { useCommandHistory } from "./useCommandHistory";
@@ -20,6 +20,7 @@ const initialState: TerminalState = {
   history: [],
   historyIndex: -1,
   isTyping: false,
+  interactiveMode: null,
 };
 
 function terminalReducer(state: TerminalState, action: TerminalAction): TerminalState {
@@ -51,7 +52,7 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
       return { ...state, currentPath: action.payload };
 
     case "CLEAR":
-      return { ...state, lines: [] };
+      return { ...state, lines: [], currentInput: "" };
 
     case "ADD_SYSTEM_LINES": {
       const sysLine: TerminalLine = {
@@ -68,15 +69,35 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
     case "NAVIGATE_HISTORY":
       return state;
 
+    case "SET_INTERACTIVE_MODE":
+      return { ...state, interactiveMode: action.payload, currentInput: "" };
+
+    case "ADD_INPUT_LINE": {
+      const inputLine: TerminalLine = {
+        id: nextLineId(),
+        type: "input",
+        command: action.payload.command,
+        currentPath: action.payload.currentPath,
+      };
+      return {
+        ...state,
+        lines: [...state.lines, inputLine],
+        currentInput: "",
+      };
+    }
+
     default:
       return state;
   }
 }
 
-export function useTerminal(theme: string, setTheme: (t: string) => void) {
+export function useTerminal(theme: string, setTheme: (t: string) => void, siteData?: SiteData) {
   const [state, dispatch] = useReducer(terminalReducer, initialState);
   const { history, addToHistory, navigateHistory } = useCommandHistory();
   const { complete } = useTabCompletion(state.currentPath);
+
+  const interactiveResolveRef = useRef<((value: string) => void) | null>(null);
+  const interactiveRejectRef = useRef<((reason: unknown) => void) | null>(null);
 
   const setInput = useCallback((value: string) => {
     dispatch({ type: "SET_INPUT", payload: value });
@@ -84,6 +105,32 @@ export function useTerminal(theme: string, setTheme: (t: string) => void) {
 
   const setPath = useCallback((path: string) => {
     dispatch({ type: "SET_PATH", payload: path });
+  }, []);
+
+  const requestInput = useCallback((prompt: string, masked: boolean): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      interactiveResolveRef.current = resolve;
+      interactiveRejectRef.current = reject;
+      dispatch({ type: "SET_INTERACTIVE_MODE", payload: { prompt, masked } });
+    });
+  }, []);
+
+  const resolveInteractiveInput = useCallback((value: string) => {
+    if (interactiveResolveRef.current) {
+      interactiveResolveRef.current(value);
+      interactiveResolveRef.current = null;
+      interactiveRejectRef.current = null;
+    }
+    dispatch({ type: "SET_INTERACTIVE_MODE", payload: null });
+  }, []);
+
+  const cancelInteractiveInput = useCallback(() => {
+    if (interactiveRejectRef.current) {
+      interactiveRejectRef.current(new Error("cancelled"));
+      interactiveResolveRef.current = null;
+      interactiveRejectRef.current = null;
+    }
+    dispatch({ type: "SET_INTERACTIVE_MODE", payload: null });
   }, []);
 
   const executeCommand = useCallback(
@@ -99,36 +146,66 @@ export function useTerminal(theme: string, setTheme: (t: string) => void) {
         setCurrentPath: (p: string) => dispatch({ type: "SET_PATH", payload: p }),
         theme,
         setTheme,
+        requestInput,
+        data: siteData,
       };
 
       const cmd = getCommand(command);
-      let output: TerminalOutputLine[];
 
       if (cmd) {
         const result = cmd.handler(args, context);
+
+        if (result instanceof Promise) {
+          // Show the typed command immediately
+          dispatch({
+            type: "ADD_INPUT_LINE",
+            payload: { command: trimmed, currentPath: state.currentPath },
+          });
+          addToHistory(trimmed);
+
+          result.then((res) => {
+            if (res.clear) {
+              dispatch({ type: "CLEAR" });
+              return;
+            }
+            if (res.output.length > 0) {
+              dispatch({ type: "ADD_SYSTEM_LINES", payload: res.output });
+            }
+          }).catch(() => {
+            // Swallow unhandled rejections from cancelled interactive input
+          });
+          return;
+        }
+
         if (result.clear) {
           dispatch({ type: "CLEAR" });
           addToHistory(trimmed);
           return;
         }
-        output = result.output;
-      } else {
-        output = [
-          {
-            id: `err-${Date.now()}`,
-            type: "error",
-            content: `bash: ${command}: command not found. Type 'help' for available commands.`,
-          },
-        ];
-      }
 
-      dispatch({
-        type: "SUBMIT_COMMAND",
-        payload: { command: trimmed, output, currentPath: state.currentPath },
-      });
+        dispatch({
+          type: "SUBMIT_COMMAND",
+          payload: { command: trimmed, output: result.output, currentPath: state.currentPath },
+        });
+      } else {
+        dispatch({
+          type: "SUBMIT_COMMAND",
+          payload: {
+            command: trimmed,
+            output: [
+              {
+                id: `err-${Date.now()}`,
+                type: "error",
+                content: `bash: ${command}: command not found. Type 'help' for available commands.`,
+              },
+            ],
+            currentPath: state.currentPath,
+          },
+        });
+      }
       addToHistory(trimmed);
     },
-    [state.currentPath, history, theme, setTheme, addToHistory]
+    [state.currentPath, history, theme, setTheme, addToHistory, requestInput, siteData]
   );
 
   const handleHistoryNavigation = useCallback(
@@ -165,5 +242,7 @@ export function useTerminal(theme: string, setTheme: (t: string) => void) {
     clear,
     addSystemLines,
     setPath,
+    resolveInteractiveInput,
+    cancelInteractiveInput,
   };
 }
