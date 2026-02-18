@@ -9,12 +9,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Yusuf Kaan Kilic | Front End Developer",
+  title: "Yusuf Kaan Kilic | Full Stack Developer",
   description:
-    "Interactive terminal-style portfolio of Yusuf Kaan Kilic — Front End Developer specializing in React, Next.js, TypeScript, and Node.js.",
+    "Interactive terminal-style portfolio of Yusuf Kaan Kilic — Full Stack Developer specializing in React, Next.js, TypeScript, and Node.js.",
   keywords: [
     "Yusuf Kaan Kilic",
-    "Front End Developer",
+    "Full Stack Developer",
     "React",
     "Next.js",
     "TypeScript",
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Yusuf Kaan Kilic" }],
   openGraph: {
-    title: "Yusuf Kaan Kilic | Front End Developer",
+    title: "Yusuf Kaan Kilic | Full Stack Developer",
     description:
-      "Interactive terminal-style portfolio — Front End Developer specializing in modern web technologies.",
+      "Interactive terminal-style portfolio — Full Stack Developer specializing in modern web technologies.",
     url: "https://yusufkaanklc.dev",
     siteName: "yusufkaanklc.dev",
     type: "website",
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Yusuf Kaan Kilic | Front End Developer",
+    title: "Yusuf Kaan Kilic | Full Stack Developer",
     description:
-      "Interactive terminal-style portfolio — Front End Developer specializing in modern web technologies.",
+      "Interactive terminal-style portfolio — Full Stack Developer specializing in modern web technologies.",
   },
   robots: {
     index: true,
@@ -53,7 +53,7 @@ export default function RootLayout({
     "@type": "Person",
     name: "Yusuf Kaan Kilic",
     url: "https://yusufkaanklc.dev",
-    jobTitle: "Front End Developer",
+    jobTitle: "Full Stack Developer",
     sameAs: [
       "https://github.com/yusufkaanklc",
       "https://linkedin.com/in/yusufkaanklc",
