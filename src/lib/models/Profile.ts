@@ -22,7 +22,7 @@ const ProfileSchema = new Schema<IProfile>(
     email: { type: String, required: true },
     phone: { type: String, required: true },
     website: { type: String, required: true },
-    resumeUrl: { type: String, required: true },
+    resumeUrl: { type: String, default: "" },
   },
   { timestamps: true }
 );

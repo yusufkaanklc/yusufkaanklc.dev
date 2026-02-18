@@ -8,8 +8,8 @@ interface FormFieldProps {
 
 export function FormField({ label, error, children }: FormFieldProps) {
   return (
-    <div className="space-y-1">
-      <label className="block text-sm text-fg-muted">{label}</label>
+    <div className="space-y-1.5">
+      <label className="block text-xs text-fg-dim font-medium uppercase tracking-wider">{label}</label>
       {children}
       {error && <p className="text-xs text-t-red">{error}</p>}
     </div>
@@ -26,7 +26,7 @@ export function Input({ label, error, ...props }: InputProps) {
     <FormField label={label} error={error}>
       <input
         {...props}
-        className="w-full px-3 py-2 rounded bg-bg-secondary border border-fg-dim/20 text-fg text-sm outline-none focus:border-accent/50 transition-colors"
+        className="w-full px-3 py-2.5 rounded-lg bg-bg-secondary/80 border border-fg-dim/12 text-fg text-sm outline-none focus:border-accent/40 focus:bg-bg-secondary transition-all placeholder:text-fg-dim/40"
       />
     </FormField>
   );
@@ -42,7 +42,7 @@ export function TextArea({ label, error, ...props }: TextAreaProps) {
     <FormField label={label} error={error}>
       <textarea
         {...props}
-        className="w-full px-3 py-2 rounded bg-bg-secondary border border-fg-dim/20 text-fg text-sm outline-none focus:border-accent/50 transition-colors min-h-[80px] resize-y"
+        className="w-full px-3 py-2.5 rounded-lg bg-bg-secondary/80 border border-fg-dim/12 text-fg text-sm outline-none focus:border-accent/40 focus:bg-bg-secondary transition-all min-h-[100px] resize-y placeholder:text-fg-dim/40"
       />
     </FormField>
   );

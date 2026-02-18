@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CardSkeleton } from "@/components/admin/LoadingSkeleton";
 
 interface Stats {
   projects: number;
@@ -14,6 +16,7 @@ interface Stats {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/data")
@@ -45,21 +48,24 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-accent">Dashboard</h2>
+      <div className="flex items-center gap-3">
+        <h2 className="text-lg font-bold text-accent">Dashboard</h2>
+        <span className="text-fg-dim/40 text-xs font-mono">~/</span>
+      </div>
 
       {!stats ? (
-        <p className="text-fg-dim animate-pulse">Loading...</p>
+        <CardSkeleton count={7} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {cards.map((card) => (
-            <a
+            <button
               key={card.label}
-              href={card.href}
-              className="block p-4 rounded-lg border border-fg-dim/15 bg-bg hover:border-accent/30 transition-colors"
+              onClick={() => router.push(card.href)}
+              className="admin-card text-left p-5 group cursor-pointer"
             >
-              <p className="text-2xl font-bold text-accent">{card.count}</p>
-              <p className="text-sm text-fg-muted mt-1">{card.label}</p>
-            </a>
+              <p className="text-2xl font-bold text-accent group-hover:glow transition-all">{card.count}</p>
+              <p className="text-xs text-fg-dim mt-1.5 font-mono">{card.label}</p>
+            </button>
           ))}
         </div>
       )}

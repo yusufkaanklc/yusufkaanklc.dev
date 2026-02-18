@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
+import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 
 interface EduItem {
   _id?: string;
@@ -25,6 +26,8 @@ const emptyCert: CertItem = { name: "", issuer: "" };
 export default function EducationPage() {
   const [eduItems, setEduItems] = useState<EduItem[]>([]);
   const [certItems, setCertItems] = useState<CertItem[]>([]);
+  const [loadingEdu, setLoadingEdu] = useState(true);
+  const [loadingCert, setLoadingCert] = useState(true);
   const [editingEdu, setEditingEdu] = useState<EduItem | null>(null);
   const [editingCert, setEditingCert] = useState<CertItem | null>(null);
   const [deletingEdu, setDeletingEdu] = useState<EduItem | null>(null);
@@ -32,8 +35,16 @@ export default function EducationPage() {
   const [showEduForm, setShowEduForm] = useState(false);
   const [showCertForm, setShowCertForm] = useState(false);
 
-  const loadEdu = () => fetch("/api/admin/education").then((r) => r.json()).then(setEduItems);
-  const loadCert = () => fetch("/api/admin/certificates").then((r) => r.json()).then(setCertItems);
+  const loadEdu = () =>
+    fetch("/api/admin/education")
+      .then((r) => r.json())
+      .then(setEduItems)
+      .finally(() => setLoadingEdu(false));
+  const loadCert = () =>
+    fetch("/api/admin/certificates")
+      .then((r) => r.json())
+      .then(setCertItems)
+      .finally(() => setLoadingCert(false));
   useEffect(() => { loadEdu(); loadCert(); }, []);
 
   const handleSaveEdu = async (e: React.FormEvent) => {
@@ -83,80 +94,93 @@ export default function EducationPage() {
       {/* Education Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-accent">Education</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-accent">Education</h2>
+            <span className="text-fg-dim/40 text-xs font-mono">~/education</span>
+          </div>
           <button
             onClick={() => { setEditingEdu({ ...emptyEdu }); setShowEduForm(true); }}
-            className="px-3 py-1.5 text-sm rounded bg-accent/15 text-accent border border-accent/20 hover:bg-accent/25 transition-colors"
+            className="px-3 py-2 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium"
           >
-            + New Education
+            + New
           </button>
         </div>
 
         {showEduForm && editingEdu && (
-          <form onSubmit={handleSaveEdu} className="space-y-4 p-4 rounded-lg border border-fg-dim/15 bg-bg">
+          <form onSubmit={handleSaveEdu} className="admin-section space-y-5 admin-fade-in">
             <Input label="Degree" value={editingEdu.degree} onChange={updateEdu("degree")} required />
             <Input label="School" value={editingEdu.school} onChange={updateEdu("school")} required />
             <Input label="Period" value={editingEdu.period} onChange={updateEdu("period")} placeholder="e.g. 2020 - 2024" required />
             <TextArea label="Description" value={editingEdu.description ?? ""} onChange={updateEdu("description")} />
-            <div className="flex gap-2">
-              <button type="submit" className="px-4 py-2 text-sm rounded bg-accent/15 text-accent border border-accent/20 hover:bg-accent/25 transition-colors">
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
                 {editingEdu._id ? "Update" : "Create"}
               </button>
-              <button type="button" onClick={() => { setShowEduForm(false); setEditingEdu(null); }} className="px-4 py-2 text-sm rounded bg-fg-dim/10 text-fg-muted hover:bg-fg-dim/20 transition-colors">
+              <button type="button" onClick={() => { setShowEduForm(false); setEditingEdu(null); }} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
                 Cancel
               </button>
             </div>
           </form>
         )}
 
-        <DataTable
-          columns={[
-            { key: "degree", label: "Degree" },
-            { key: "school", label: "School" },
-            { key: "period", label: "Period" },
-          ]}
-          data={eduItems}
-          onEdit={(item) => { setEditingEdu({ ...item }); setShowEduForm(true); }}
-          onDelete={setDeletingEdu}
-        />
+        {loadingEdu ? <LoadingSkeleton rows={3} /> : (
+          <DataTable
+            columns={[
+              { key: "degree", label: "Degree" },
+              { key: "school", label: "School" },
+              { key: "period", label: "Period", render: (e) => <span className="text-fg-dim font-mono text-xs">{e.period}</span> },
+            ]}
+            data={eduItems}
+            onEdit={(item) => { setEditingEdu({ ...item }); setShowEduForm(true); }}
+            onDelete={setDeletingEdu}
+          />
+        )}
       </div>
+
+      {/* Divider */}
+      <div className="border-t border-fg-dim/8" />
 
       {/* Certificates Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-accent-secondary">Certificates</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-accent-secondary">Certificates</h2>
+            <span className="text-fg-dim/40 text-xs font-mono">~/certificates</span>
+          </div>
           <button
             onClick={() => { setEditingCert({ ...emptyCert }); setShowCertForm(true); }}
-            className="px-3 py-1.5 text-sm rounded bg-accent-secondary/15 text-accent-secondary border border-accent-secondary/20 hover:bg-accent-secondary/25 transition-colors"
+            className="px-3 py-2 text-sm rounded-lg bg-accent-secondary/10 text-accent-secondary border border-accent-secondary/20 hover:bg-accent-secondary/20 transition-all font-medium"
           >
-            + New Certificate
+            + New
           </button>
         </div>
 
         {showCertForm && editingCert && (
-          <form onSubmit={handleSaveCert} className="space-y-4 p-4 rounded-lg border border-fg-dim/15 bg-bg">
+          <form onSubmit={handleSaveCert} className="admin-section space-y-5 admin-fade-in">
             <Input label="Name" value={editingCert.name} onChange={updateCert("name")} required />
             <Input label="Issuer" value={editingCert.issuer} onChange={updateCert("issuer")} required />
-            <div className="flex gap-2">
-              <button type="submit" className="px-4 py-2 text-sm rounded bg-accent-secondary/15 text-accent-secondary border border-accent-secondary/20 hover:bg-accent-secondary/25 transition-colors">
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent-secondary/10 text-accent-secondary border border-accent-secondary/20 hover:bg-accent-secondary/20 transition-all font-medium">
                 {editingCert._id ? "Update" : "Create"}
               </button>
-              <button type="button" onClick={() => { setShowCertForm(false); setEditingCert(null); }} className="px-4 py-2 text-sm rounded bg-fg-dim/10 text-fg-muted hover:bg-fg-dim/20 transition-colors">
+              <button type="button" onClick={() => { setShowCertForm(false); setEditingCert(null); }} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
                 Cancel
               </button>
             </div>
           </form>
         )}
 
-        <DataTable
-          columns={[
-            { key: "name", label: "Certificate" },
-            { key: "issuer", label: "Issuer" },
-          ]}
-          data={certItems}
-          onEdit={(item) => { setEditingCert({ ...item }); setShowCertForm(true); }}
-          onDelete={setDeletingCert}
-        />
+        {loadingCert ? <LoadingSkeleton rows={3} /> : (
+          <DataTable
+            columns={[
+              { key: "name", label: "Certificate" },
+              { key: "issuer", label: "Issuer" },
+            ]}
+            data={certItems}
+            onEdit={(item) => { setEditingCert({ ...item }); setShowCertForm(true); }}
+            onDelete={setDeletingCert}
+          />
+        )}
       </div>
 
       <ConfirmDialog
