@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import { profile } from "../data/profile";
 import { projects } from "../data/projects";
