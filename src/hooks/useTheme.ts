@@ -5,17 +5,18 @@ import { themes, type ThemeName } from "@/types/theme";
 
 const DEFAULT_THEME: ThemeName = "tokyoNight";
 
+function getInitialTheme(): ThemeName {
+  if (typeof window === "undefined") return DEFAULT_THEME;
+  const stored = localStorage.getItem("terminal-theme") as ThemeName | null;
+  return stored && themes[stored] ? stored : DEFAULT_THEME;
+}
+
 export function useTheme() {
-  const [theme, setThemeState] = useState<ThemeName>(DEFAULT_THEME);
+  const [theme, setThemeState] = useState<ThemeName>(getInitialTheme);
 
   useEffect(() => {
-    const stored = localStorage.getItem("terminal-theme") as ThemeName | null;
-    if (stored && themes[stored]) {
-      setThemeState(stored);
-      applyThemeToDOM(stored);
-    } else {
-      applyThemeToDOM(DEFAULT_THEME);
-    }
+    applyThemeToDOM(theme);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only apply initial theme on mount
   }, []);
 
   const setTheme = useCallback((name: string) => {

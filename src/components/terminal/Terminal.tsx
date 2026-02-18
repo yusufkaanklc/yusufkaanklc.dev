@@ -29,14 +29,15 @@ export function Terminal() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [initialized, setInitialized] = useState(false);
+  const initializedRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Initialize file system and show welcome
   useEffect(() => {
     setFileSystemRoot(buildFileSystem());
 
-    if (!initialized) {
+    if (!initializedRef.current) {
+      initializedRef.current = true;
       addSystemLines([
         {
           id: "ascii-banner",
@@ -49,9 +50,8 @@ export function Terminal() {
           content: line,
         })),
       ]);
-      setInitialized(true);
     }
-  }, [initialized, addSystemLines]);
+  }, [addSystemLines]);
 
   // Auto-scroll only on new lines
   useEffect(() => {
