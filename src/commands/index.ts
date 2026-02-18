@@ -18,3 +18,4 @@ import "./echo";
 import "./sudo";
 import "./neofetch";
 import "./resume";
+import "./visitors";
