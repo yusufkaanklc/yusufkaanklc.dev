@@ -19,3 +19,4 @@ import "./sudo";
 import "./neofetch";
 import "./resume";
 import "./visitors";
+import "./photo";
