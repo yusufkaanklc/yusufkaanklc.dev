@@ -1,4 +1,4 @@
-import { getCommandNames } from "./commandRegistry";
+import { getVisibleCommandNames } from "./commandRegistry";
 import { getChildNames, resolvePath } from "./fileSystem";
 import { themes, type ThemeName } from "@/types/theme";
 
@@ -9,7 +9,7 @@ export function getCompletions(input: string, currentPath: string): string[] {
 
   if (parts.length <= 1) {
     const prefix = parts[0] || "";
-    return getCommandNames().filter((cmd) => cmd.startsWith(prefix));
+    return getVisibleCommandNames().filter((cmd) => cmd.startsWith(prefix));
   }
 
   const command = parts[0];

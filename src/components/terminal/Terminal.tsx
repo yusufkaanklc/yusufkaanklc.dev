@@ -11,6 +11,7 @@ import { TerminalHeader } from "./TerminalHeader";
 import { AnnouncementBanner } from "./AnnouncementBanner";
 import { TerminalOutput } from "./TerminalOutput";
 import { TerminalInput } from "./TerminalInput";
+import { useKonamiCode } from "@/hooks/useKonamiCode";
 
 // Register all commands via side-effect imports
 import "@/commands";
@@ -31,6 +32,9 @@ export function Terminal() {
     resolveInteractiveInput,
     cancelInteractiveInput,
   } = useTerminal(theme, setTheme, data ?? undefined);
+
+  const { isGlitching, activated: konamiActivated } = useKonamiCode();
+  const konamiMessageShown = useRef(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -104,6 +108,27 @@ export function Terminal() {
     inputRef.current?.focus();
   }, []);
 
+  // Konami code message
+  useEffect(() => {
+    if (konamiActivated && !isGlitching && !konamiMessageShown.current) {
+      konamiMessageShown.current = true;
+      addSystemLines([
+        {
+          id: `konami-1-${Date.now()}`,
+          type: "system" as const,
+          content: "[SYSTEM] Cheat mode activated. +30 lives.",
+          className: "text-t-green",
+        },
+        {
+          id: `konami-2-${Date.now()}`,
+          type: "system" as const,
+          content: "[SYSTEM] Just kidding. But you clearly know your classics. ↑↑↓↓←→←→BA",
+          className: "text-fg-muted",
+        },
+      ]);
+    }
+  }, [konamiActivated, isGlitching, addSystemLines]);
+
   // Detect mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -131,7 +156,7 @@ export function Terminal() {
 
   return (
     <div className="terminal-container flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
-      <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden transition-colors duration-300">
+      <div className={`flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden transition-colors duration-300${isGlitching ? " crt-glitch" : ""}`}>
         <TerminalHeader currentPath={state.currentPath} />
         <AnnouncementBanner />
 

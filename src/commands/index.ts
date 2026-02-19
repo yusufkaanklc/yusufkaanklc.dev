@@ -21,3 +21,6 @@ import "./neofetch";
 import "./resume";
 import "./visitors";
 import "./photo";
+import "./fortune";
+import "./matrix";
+import "./rm";

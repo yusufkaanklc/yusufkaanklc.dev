@@ -6,7 +6,7 @@ registerCommand({
   name: "help",
   description: "List all available commands",
   handler: () => {
-    const commands = getAllCommands();
+    const commands = getAllCommands().filter((cmd) => cmd.hidden !== true);
     return {
       output: [
         {

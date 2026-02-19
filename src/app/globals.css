@@ -228,3 +228,72 @@ body:has(.terminal-container) {
   border-radius: 0.5rem;
   border: 1px solid rgba(var(--accent-rgb), 0.1);
 }
+
+/* Easter egg: text corruption animation */
+@keyframes text-corrupt {
+  0% { transform: none; filter: none; }
+  10% { transform: skewX(-2deg); }
+  20% { transform: skewX(3deg) translateX(2px); filter: hue-rotate(90deg); }
+  30% { transform: skewX(-1deg) translateY(1px); }
+  40% { transform: skewX(2deg) translateX(-3px); filter: hue-rotate(180deg); }
+  50% { transform: none; }
+  60% { transform: skewX(-3deg) translateX(1px); filter: hue-rotate(270deg); }
+  70% { transform: translateY(-2px); }
+  80% { transform: skewX(1deg) translateX(-1px); filter: hue-rotate(45deg); }
+  90% { transform: skewX(-2deg) translateY(1px); }
+  100% { transform: none; filter: none; }
+}
+
+.animate-text-corrupt {
+  animation: text-corrupt 0.3s ease-in-out infinite;
+}
+
+/* Easter egg: CRT glitch effect (Konami code) */
+@keyframes crt-glitch {
+  0% { transform: none; filter: none; }
+  5% { transform: translate(-2px, 1px); filter: hue-rotate(90deg) saturate(2); }
+  10% { transform: translate(2px, -1px); filter: hue-rotate(0deg); }
+  15% { transform: translate(-1px, 2px) skewX(1deg); filter: hue-rotate(180deg) saturate(3); }
+  20% { transform: translate(1px, 0px); filter: none; }
+  25% { transform: translate(-3px, -1px); filter: hue-rotate(270deg); }
+  30% { transform: none; filter: saturate(2); }
+  35% { transform: translate(2px, 1px) skewX(-1deg); }
+  40% { transform: translate(-1px, -2px); filter: hue-rotate(90deg); }
+  45% { transform: none; filter: none; }
+  50% { transform: translate(1px, 2px); filter: hue-rotate(180deg) saturate(2); }
+  55% { transform: translate(-2px, 0); }
+  60% { transform: translate(0, -1px) skewX(2deg); filter: hue-rotate(270deg); }
+  65% { transform: none; filter: none; }
+  70% { transform: translate(-1px, 1px); filter: saturate(3); }
+  75% { transform: translate(3px, -2px); filter: hue-rotate(90deg); }
+  80% { transform: none; }
+  85% { transform: translate(-2px, 1px) skewX(-1deg); filter: hue-rotate(180deg); }
+  90% { transform: translate(1px, -1px); filter: none; }
+  95% { transform: translate(-1px, 2px); filter: hue-rotate(270deg) saturate(2); }
+  100% { transform: none; filter: none; }
+}
+
+.crt-glitch {
+  animation: crt-glitch 0.15s ease-in-out infinite;
+}
+
+.crt-glitch * {
+  text-shadow:
+    2px 0 rgba(255, 0, 0, 0.7),
+    -2px 0 rgba(0, 255, 255, 0.7) !important;
+}
+
+.crt-glitch::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+}

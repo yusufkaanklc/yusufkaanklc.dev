@@ -17,3 +17,9 @@ export function getAllCommands(): CommandDefinition[] {
 export function getCommandNames(): string[] {
   return Array.from(commands.keys());
 }
+
+export function getVisibleCommandNames(): string[] {
+  return Array.from(commands.entries())
+    .filter(([, cmd]) => cmd.hidden !== true)
+    .map(([name]) => name);
+}

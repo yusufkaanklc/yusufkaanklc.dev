@@ -4,6 +4,7 @@ export interface CommandDefinition {
   name: string;
   description: string;
   usage?: string;
+  hidden?: boolean;
   handler: (args: string[], context: CommandContext) => CommandResult | Promise<CommandResult>;
 }
 

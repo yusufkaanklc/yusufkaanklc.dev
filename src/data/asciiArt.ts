@@ -69,7 +69,8 @@ export const asciiLogo = [
 export const welcomeLines = [
   "",
   "  Welcome to yusufkaanklc.dev",
-  "  Type 'help' to see available commands or 'resume' to download my CV.",
+  "  Type 'help' to see available commands.",
+  "  Psst... this terminal has secrets. Can you find them all? 👀",
   "",
 ];
 
