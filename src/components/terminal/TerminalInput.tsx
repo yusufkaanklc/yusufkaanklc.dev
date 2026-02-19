@@ -78,13 +78,13 @@ export const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
     }
 
     return (
-      <div className="flex flex-wrap items-center">
-        <span className="text-accent font-bold">{PROMPT_USER}</span>
-        <span className="text-fg-dim">@</span>
-        <span className="text-accent-secondary">{PROMPT_HOST}</span>
-        <span className="text-fg-dim">:</span>
-        <span className="text-prompt-path">{currentPath}</span>
-        <span className="text-fg-dim mr-2">$</span>
+      <div className="flex items-center">
+        <span className="shrink-0 text-accent font-bold">{PROMPT_USER}</span>
+        <span className="shrink-0 text-fg-dim">@</span>
+        <span className="shrink-0 text-accent-secondary">{PROMPT_HOST}</span>
+        <span className="shrink-0 text-fg-dim">:</span>
+        <span className="shrink-0 text-prompt-path">{currentPath}</span>
+        <span className="shrink-0 text-fg-dim mr-2">$</span>
 
         <div className="relative flex-1 min-w-[100px]">
           <input
@@ -117,7 +117,7 @@ export const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
             spellCheck={false}
             aria-label="Terminal command input"
           />
-          <span className="text-fg pointer-events-none">{value}</span>
+          <span className="text-fg pointer-events-none whitespace-pre">{value}</span>
           <span className="inline-block w-2 h-[1.2em] bg-accent/80 ml-px animate-blink align-middle" />
         </div>
       </div>

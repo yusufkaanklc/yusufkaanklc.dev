@@ -7,6 +7,7 @@ import { experiences as staticExperiences } from "./experience";
 import { educationList as staticEducationList, certificates as staticCertificates } from "./education";
 import { socials as staticSocials } from "./socials";
 import { blogPosts as staticBlogPosts } from "./blog";
+import { announcements as staticAnnouncements } from "./announcements";
 import { contact as staticContact } from "./contact";
 
 export function buildFileSystem(data?: SiteData): DirectoryNode {
@@ -18,6 +19,7 @@ export function buildFileSystem(data?: SiteData): DirectoryNode {
   const certificates = data?.certificates ?? staticCertificates;
   const socials = data?.socials ?? staticSocials;
   const blogPosts = data?.blogPosts ?? staticBlogPosts;
+  const announcements = data?.announcements ?? staticAnnouncements;
   const contact = data?.contact ?? staticContact;
 
   return {
@@ -147,6 +149,35 @@ export function buildFileSystem(data?: SiteData): DirectoryNode {
                   p.content ?? "",
                 ]
                   .filter((line, i) => i < 6 || line !== "")
+                  .join("\n"),
+              },
+            ])
+        ),
+      },
+      announcements: {
+        type: "directory",
+        name: "announcements",
+        children: Object.fromEntries(
+          announcements
+            .filter((a) => a.published)
+            .map((a) => [
+              `${a.slug}.md`,
+              {
+                type: "file" as const,
+                name: `${a.slug}.md`,
+                content: [
+                  `# ${a.title}`,
+                  "",
+                  `Date: ${a.date}`,
+                  `Priority: ${a.priority}`,
+                  "",
+                  a.summary,
+                  "",
+                  "---",
+                  "",
+                  a.content ?? "",
+                ]
+                  .filter((line, i) => i < 5 || line !== "")
                   .join("\n"),
               },
             ])

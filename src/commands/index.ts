@@ -8,6 +8,7 @@ import "./education";
 import "./contact";
 import "./socials";
 import "./blog";
+import "./announcements";
 import "./clear";
 import "./filesystem";
 import "./whoami";

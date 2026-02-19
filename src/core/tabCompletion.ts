@@ -4,6 +4,7 @@ import { themes, type ThemeName } from "@/types/theme";
 
 export function getCompletions(input: string, currentPath: string): string[] {
   const trimmed = input.trimStart();
+  if (trimmed.endsWith(" ")) return [];
   const parts = trimmed.split(/\s+/);
 
   if (parts.length <= 1) {

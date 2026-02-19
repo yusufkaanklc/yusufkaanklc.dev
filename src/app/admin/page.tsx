@@ -12,6 +12,7 @@ interface Stats {
   education: number;
   certificates: number;
   socials: number;
+  announcements: number;
 }
 
 export default function AdminDashboard() {
@@ -19,25 +20,28 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/data")
-      .then((r) => r.json())
-      .then((data) => {
-        setStats({
-          projects: data.projects?.length ?? 0,
-          blogPosts: data.blogPosts?.length ?? 0,
-          skills: data.skillCategories?.length ?? 0,
-          experiences: data.experiences?.length ?? 0,
-          education: data.educationList?.length ?? 0,
-          certificates: data.certificates?.length ?? 0,
-          socials: data.socials?.length ?? 0,
-        });
+    Promise.all([
+      fetch("/api/data").then((r) => r.json()),
+      fetch("/api/admin/announcements").then((r) => r.json()),
+    ]).then(([data, announcements]) => {
+      setStats({
+        projects: data.projects?.length ?? 0,
+        blogPosts: data.blogPosts?.length ?? 0,
+        skills: data.skillCategories?.length ?? 0,
+        experiences: data.experiences?.length ?? 0,
+        education: data.educationList?.length ?? 0,
+        certificates: data.certificates?.length ?? 0,
+        socials: data.socials?.length ?? 0,
+        announcements: Array.isArray(announcements) ? announcements.length : 0,
       });
+    });
   }, []);
 
   const cards = stats
     ? [
         { label: "Projects", count: stats.projects, href: "/admin/projects" },
         { label: "Blog Posts", count: stats.blogPosts, href: "/admin/blog" },
+        { label: "Announcements", count: stats.announcements, href: "/admin/announcements" },
         { label: "Skill Categories", count: stats.skills, href: "/admin/skills" },
         { label: "Experiences", count: stats.experiences, href: "/admin/experience" },
         { label: "Education", count: stats.education, href: "/admin/education" },
@@ -54,7 +58,7 @@ export default function AdminDashboard() {
       </div>
 
       {!stats ? (
-        <CardSkeleton count={7} />
+        <CardSkeleton count={8} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {cards.map((card) => (

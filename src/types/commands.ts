@@ -37,6 +37,7 @@ export interface SiteData {
   certificates: { _id?: string; name: string; issuer: string }[];
   contact: { email: string; phone: string; location: string; availability: string };
   socials: { _id?: string; name: string; url: string; icon: string }[];
+  announcements: { _id?: string; title: string; slug: string; date: string; summary: string; content?: string; priority: "normal" | "important" | "critical"; published: boolean }[];
 }
 
 export interface CommandResult {

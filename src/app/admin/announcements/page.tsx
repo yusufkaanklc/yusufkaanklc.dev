@@ -1,0 +1,208 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { DataTable } from "@/components/admin/DataTable";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { Input, TextArea } from "@/components/admin/FormField";
+import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
+
+interface AnnouncementItem {
+  _id?: string;
+  title: string;
+  slug: string;
+  date: string;
+  summary: string;
+  content?: string;
+  priority: "normal" | "important" | "critical";
+  published: boolean;
+}
+
+const emptyAnnouncement: AnnouncementItem = {
+  title: "",
+  slug: "",
+  date: "",
+  summary: "",
+  content: "",
+  priority: "normal",
+  published: false,
+};
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+const priorityColors = {
+  normal: { bg: "bg-accent/10", text: "text-accent", border: "border-accent/20" },
+  important: { bg: "bg-t-yellow/10", text: "text-t-yellow", border: "border-t-yellow/20" },
+  critical: { bg: "bg-t-red/10", text: "text-t-red", border: "border-t-red/20" },
+};
+
+export default function AnnouncementsPage() {
+  const [items, setItems] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<AnnouncementItem | null>(null);
+  const [deleting, setDeleting] = useState<AnnouncementItem | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const load = () =>
+    fetch("/api/admin/announcements")
+      .then((r) => r.json())
+      .then(setItems)
+      .finally(() => setLoading(false));
+  useEffect(() => { load(); }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const method = editing._id ? "PUT" : "POST";
+    const url = editing._id ? `/api/admin/announcements/${editing._id}` : "/api/admin/announcements";
+    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
+    setEditing(null);
+    setShowForm(false);
+    load();
+  };
+
+  const handleDelete = async () => {
+    if (!deleting?._id) return;
+    await fetch(`/api/admin/announcements/${deleting._id}`, { method: "DELETE" });
+    setDeleting(null);
+    load();
+  };
+
+  const update = (field: keyof AnnouncementItem) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setEditing((prev) => prev ? { ...prev, [field]: e.target.value } : prev);
+
+  const startEdit = (item: AnnouncementItem) => {
+    setEditing({ ...item });
+    setShowForm(true);
+  };
+
+  const startNew = () => {
+    setEditing({ ...emptyAnnouncement });
+    setShowForm(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-bold text-accent">Announcements</h2>
+          <span className="text-fg-dim/40 text-xs font-mono">~/announcements</span>
+        </div>
+        <button
+          onClick={startNew}
+          className="px-3 py-2 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium"
+        >
+          + New
+        </button>
+      </div>
+
+      {showForm && editing && (
+        <form onSubmit={handleSave} className="admin-section space-y-5 admin-fade-in">
+          <Input label="Title" value={editing.title} onChange={(e) => {
+            const title = e.target.value;
+            setEditing((prev) => prev ? {
+              ...prev,
+              title,
+              ...(prev._id ? {} : { slug: generateSlug(title) }),
+            } : prev);
+          }} required />
+          <Input
+            label="Slug"
+            value={editing.slug}
+            onChange={update("slug")}
+            required
+          />
+          <Input label="Date" type="date" value={editing.date} onChange={update("date")} required />
+          <TextArea label="Summary" value={editing.summary} onChange={update("summary")} required />
+          <TextArea label="Content (Markdown)" value={editing.content ?? ""} onChange={update("content")} />
+
+          {/* Priority selector */}
+          <div>
+            <label className="block text-xs text-fg-dim mb-2 font-mono uppercase tracking-wider">Priority</label>
+            <div className="flex gap-2">
+              {(["normal", "important", "critical"] as const).map((p) => {
+                const colors = priorityColors[p];
+                const isActive = editing.priority === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setEditing((prev) => prev ? { ...prev, priority: p } : prev)}
+                    className={`px-3 py-1.5 text-sm rounded-lg border transition-all font-medium capitalize ${
+                      isActive
+                        ? `${colors.bg} ${colors.text} ${colors.border}`
+                        : "bg-fg-dim/5 text-fg-dim border-fg-dim/10 hover:bg-fg-dim/10"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-fg-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editing.published}
+                onChange={(e) => setEditing((prev) => prev ? { ...prev, published: e.target.checked } : prev)}
+                className="accent-accent w-4 h-4"
+              />
+              Published
+            </label>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
+              {editing._id ? "Update" : "Create"}
+            </button>
+            <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {loading ? <LoadingSkeleton rows={5} /> : (
+        <DataTable
+          columns={[
+            { key: "title", label: "Title" },
+            { key: "date", label: "Date", render: (a) => <span className="text-fg-dim font-mono text-xs">{a.date}</span> },
+            { key: "priority", label: "Priority", render: (a) => {
+              const colors = priorityColors[a.priority as keyof typeof priorityColors] ?? priorityColors.normal;
+              return (
+                <span className={`text-xs px-1.5 py-0.5 rounded ${colors.bg} ${colors.text} font-medium capitalize`}>
+                  {a.priority}
+                </span>
+              );
+            }},
+            { key: "published", label: "Status", render: (a) => (
+              <span className={`text-xs font-medium ${a.published ? "text-t-green" : "text-fg-dim"}`}>
+                {a.published ? "Published" : "Draft"}
+              </span>
+            )},
+            { key: "summary", label: "Summary", render: (a) => <span className="line-clamp-1 text-fg-dim">{a.summary}</span> },
+          ]}
+          data={items}
+          onEdit={startEdit}
+          onDelete={setDeleting}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!deleting}
+        title="Delete Announcement"
+        message={`Are you sure you want to delete "${deleting?.title}"?`}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleting(null)}
+      />
+    </div>
+  );
+}

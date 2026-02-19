@@ -8,6 +8,7 @@ import { setFileSystemRoot } from "@/core/fileSystem";
 import { buildFileSystem } from "@/data/fileSystemData";
 import { asciiLogo, welcomeLines } from "@/data/asciiArt";
 import { TerminalHeader } from "./TerminalHeader";
+import { AnnouncementBanner } from "./AnnouncementBanner";
 import { TerminalOutput } from "./TerminalOutput";
 import { TerminalInput } from "./TerminalInput";
 
@@ -121,7 +122,7 @@ export function Terminal() {
   if (loading) {
     return (
       <div className="terminal-container flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
-        <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden glow-border transition-colors duration-300 items-center justify-center">
+        <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden transition-colors duration-300 items-center justify-center">
           <span className="text-accent animate-pulse font-mono">Loading...</span>
         </div>
       </div>
@@ -130,8 +131,9 @@ export function Terminal() {
 
   return (
     <div className="terminal-container flex flex-col h-[100dvh] max-w-5xl mx-auto p-2 sm:p-4 md:p-8">
-      <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden glow-border transition-colors duration-300">
+      <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-fg-dim/15 bg-bg overflow-hidden transition-colors duration-300">
         <TerminalHeader currentPath={state.currentPath} />
+        <AnnouncementBanner />
 
         {/* Scanline overlay */}
         <div className="relative flex-1 min-h-0">
