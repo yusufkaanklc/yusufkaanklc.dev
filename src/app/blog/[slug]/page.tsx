@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { useTheme } from "@/hooks/useTheme";
 
 interface BlogPostData {
   _id: string;
@@ -19,6 +20,7 @@ interface BlogPostData {
 
 export default function BlogDetailPage() {
   const params = useParams<{ slug: string }>();
+  useTheme();
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [readerCount, setReaderCount] = useState(0);
   const [loading, setLoading] = useState(true);

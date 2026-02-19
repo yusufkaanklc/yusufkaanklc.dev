@@ -141,8 +141,12 @@ export function buildFileSystem(data?: SiteData): DirectoryNode {
                   p.tags.length > 0 ? `Tags: ${p.tags.join(", ")}` : "",
                   "",
                   p.summary,
+                  "",
+                  "---",
+                  "",
+                  p.content ?? "",
                 ]
-                  .filter(Boolean)
+                  .filter((line, i) => i < 6 || line !== "")
                   .join("\n"),
               },
             ])
