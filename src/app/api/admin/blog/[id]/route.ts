@@ -4,6 +4,12 @@ import { BlogPost } from "@/lib/models/BlogPost";
 import { blogPostSchema } from "@/lib/validations";
 import mongoose from "mongoose";
 
+function calculateReadingTime(content?: string): number {
+  if (!content) return 1;
+  const words = content.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
@@ -16,10 +22,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
-    const post = await BlogPost.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
+    const data = { ...parsed.data };
+    if (parsed.data.content !== undefined) {
+      data.readingTime = calculateReadingTime(parsed.data.content);
+    }
+    const post = await BlogPost.findByIdAndUpdate(id, data, { new: true }).lean();
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(post);
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && "code" in err && (err as Record<string, unknown>).code === 11000) {
+      return NextResponse.json({ error: { slug: ["Slug already exists"] } }, { status: 400 });
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

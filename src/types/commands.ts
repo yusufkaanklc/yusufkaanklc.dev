@@ -30,7 +30,7 @@ export interface SiteData {
     resumeUrl: string;
   };
   projects: { _id?: string; name: string; description: string; tech: string[]; url?: string; github?: string }[];
-  blogPosts: { _id?: string; title: string; date: string; summary: string; content?: string; url?: string }[];
+  blogPosts: { _id?: string; title: string; slug: string; date: string; summary: string; content?: string; tags: string[]; coverImage?: string; readingTime: number; published: boolean; url?: string }[];
   skillCategories: { _id?: string; name: string; skills: string[] }[];
   experiences: { _id?: string; role: string; company: string; location: string; period: string; description: string }[];
   educationList: { _id?: string; degree: string; school: string; period: string; description?: string }[];

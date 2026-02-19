@@ -125,15 +125,28 @@ export function buildFileSystem(data?: SiteData): DirectoryNode {
       blog: {
         type: "directory",
         name: "blog",
-        children: {
-          "posts.txt": {
-            type: "file",
-            name: "posts.txt",
-            content: blogPosts
-              .map((p) => `[${p.date}] ${p.title}\n  ${p.summary}`)
-              .join("\n\n"),
-          },
-        },
+        children: Object.fromEntries(
+          blogPosts
+            .filter((p) => p.published)
+            .map((p) => [
+              `${p.slug}.md`,
+              {
+                type: "file" as const,
+                name: `${p.slug}.md`,
+                content: [
+                  `# ${p.title}`,
+                  "",
+                  `Date: ${p.date}`,
+                  `Reading Time: ${p.readingTime} min`,
+                  p.tags.length > 0 ? `Tags: ${p.tags.join(", ")}` : "",
+                  "",
+                  p.summary,
+                ]
+                  .filter(Boolean)
+                  .join("\n"),
+              },
+            ])
+        ),
       },
     },
   };

@@ -6,7 +6,8 @@ registerCommand({
   name: "blog",
   description: "View blog posts",
   handler: (_args, context) => {
-    const blogPosts = context.data?.blogPosts ?? staticBlogPosts;
+    const allPosts = context.data?.blogPosts ?? staticBlogPosts;
+    const blogPosts = allPosts.filter((post) => post.published);
     return {
       output: [
         {
@@ -14,11 +15,13 @@ registerCommand({
           type: "component",
           component: <p className="text-accent font-bold mb-2">Blog Posts:</p>,
         },
-        ...blogPosts.map((post, i) => ({
-          id: `blog-${i}-${Date.now()}`,
-          type: "component" as const,
-          component: <BlogPostEntry post={post} />,
-        })),
+        ...(blogPosts.length === 0
+          ? [{ id: `blog-empty-${Date.now()}`, type: "text" as const, content: "  No published posts yet." }]
+          : blogPosts.map((post, i) => ({
+              id: `blog-${i}-${Date.now()}`,
+              type: "component" as const,
+              component: <BlogPostEntry post={post} />,
+            }))),
       ],
     };
   },

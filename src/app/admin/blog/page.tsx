@@ -9,13 +9,37 @@ import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 interface BlogItem {
   _id?: string;
   title: string;
+  slug: string;
   date: string;
   summary: string;
   content?: string;
+  tags: string[];
+  coverImage?: string;
+  readingTime?: number;
+  published: boolean;
   url?: string;
 }
 
-const emptyPost: BlogItem = { title: "", date: "", summary: "", content: "", url: "" };
+const emptyPost: BlogItem = {
+  title: "",
+  slug: "",
+  date: "",
+  summary: "",
+  content: "",
+  tags: [],
+  coverImage: "",
+  published: false,
+  url: "",
+};
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 export default function BlogPage() {
   const [items, setItems] = useState<BlogItem[]>([]);
@@ -23,6 +47,7 @@ export default function BlogPage() {
   const [editing, setEditing] = useState<BlogItem | null>(null);
   const [deleting, setDeleting] = useState<BlogItem | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [tagsInput, setTagsInput] = useState("");
 
   const load = () =>
     fetch("/api/admin/blog")
@@ -34,9 +59,13 @@ export default function BlogPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    const payload = {
+      ...editing,
+      tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean),
+    };
     const method = editing._id ? "PUT" : "POST";
     const url = editing._id ? `/api/admin/blog/${editing._id}` : "/api/admin/blog";
-    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
+    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     setEditing(null);
     setShowForm(false);
     load();
@@ -52,6 +81,18 @@ export default function BlogPage() {
   const update = (field: keyof BlogItem) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setEditing((prev) => prev ? { ...prev, [field]: e.target.value } : prev);
 
+  const startEdit = (item: BlogItem) => {
+    setEditing({ ...item });
+    setTagsInput((item.tags ?? []).join(", "));
+    setShowForm(true);
+  };
+
+  const startNew = () => {
+    setEditing({ ...emptyPost });
+    setTagsInput("");
+    setShowForm(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -60,7 +101,7 @@ export default function BlogPage() {
           <span className="text-fg-dim/40 text-xs font-mono">~/blog</span>
         </div>
         <button
-          onClick={() => { setEditing({ ...emptyPost }); setShowForm(true); }}
+          onClick={startNew}
           className="px-3 py-2 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium"
         >
           + New
@@ -69,11 +110,42 @@ export default function BlogPage() {
 
       {showForm && editing && (
         <form onSubmit={handleSave} className="admin-section space-y-5 admin-fade-in">
-          <Input label="Title" value={editing.title} onChange={update("title")} required />
+          <Input label="Title" value={editing.title} onChange={(e) => {
+            const title = e.target.value;
+            setEditing((prev) => prev ? {
+              ...prev,
+              title,
+              ...(prev._id ? {} : { slug: generateSlug(title) }),
+            } : prev);
+          }} required />
+          <Input
+            label="Slug"
+            value={editing.slug}
+            onChange={update("slug")}
+            required
+          />
           <Input label="Date" type="date" value={editing.date} onChange={update("date")} required />
           <TextArea label="Summary" value={editing.summary} onChange={update("summary")} required />
-          <TextArea label="Content" value={editing.content ?? ""} onChange={update("content")} />
-          <Input label="URL" value={editing.url ?? ""} onChange={update("url")} />
+          <TextArea label="Content (Markdown)" value={editing.content ?? ""} onChange={update("content")} />
+          <Input label="Tags (comma-separated)" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
+          <Input label="Cover Image URL" value={editing.coverImage ?? ""} onChange={update("coverImage")} />
+          <Input label="URL (external)" value={editing.url ?? ""} onChange={update("url")} />
+
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-fg-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editing.published}
+                onChange={(e) => setEditing((prev) => prev ? { ...prev, published: e.target.checked } : prev)}
+                className="accent-accent w-4 h-4"
+              />
+              Published
+            </label>
+            {editing.readingTime && (
+              <span className="text-xs text-fg-dim">~{editing.readingTime} min read</span>
+            )}
+          </div>
+
           <div className="flex gap-2 pt-2">
             <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
               {editing._id ? "Update" : "Create"}
@@ -90,10 +162,22 @@ export default function BlogPage() {
           columns={[
             { key: "title", label: "Title" },
             { key: "date", label: "Date", render: (p) => <span className="text-fg-dim font-mono text-xs">{p.date}</span> },
+            { key: "tags", label: "Tags", render: (p) => (
+              <div className="flex flex-wrap gap-1">
+                {(p.tags ?? []).map((t: string) => (
+                  <span key={t} className="text-xs px-1.5 py-0.5 rounded bg-accent/10 text-accent">{t}</span>
+                ))}
+              </div>
+            )},
+            { key: "published", label: "Status", render: (p) => (
+              <span className={`text-xs font-medium ${p.published ? "text-t-green" : "text-fg-dim"}`}>
+                {p.published ? "Published" : "Draft"}
+              </span>
+            )},
             { key: "summary", label: "Summary", render: (p) => <span className="line-clamp-1 text-fg-dim">{p.summary}</span> },
           ]}
           data={items}
-          onEdit={(item) => { setEditing({ ...item }); setShowForm(true); }}
+          onEdit={startEdit}
           onDelete={setDeleting}
         />
       )}

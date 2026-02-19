@@ -18,7 +18,7 @@ export async function GET() {
       await Promise.all([
         Profile.findOne().lean(),
         Project.find().lean(),
-        BlogPost.find().lean(),
+        BlogPost.find({ published: true }).lean(),
         SkillCategory.find().lean(),
         Experience.find().lean(),
         Education.find().lean(),

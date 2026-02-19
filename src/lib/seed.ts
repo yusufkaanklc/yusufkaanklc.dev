@@ -12,6 +12,7 @@ import { socials } from "../data/socials";
 import { Profile } from "./models/Profile";
 import { Project } from "./models/Project";
 import { BlogPost } from "./models/BlogPost";
+import { BlogReader } from "./models/BlogReader";
 import { SkillCategory } from "./models/SkillCategory";
 import { Experience } from "./models/Experience";
 import { Education } from "./models/Education";
@@ -36,6 +37,7 @@ async function seed() {
     Profile.deleteMany({}),
     Project.deleteMany({}),
     BlogPost.deleteMany({}),
+    BlogReader.deleteMany({}),
     SkillCategory.deleteMany({}),
     Experience.deleteMany({}),
     Education.deleteMany({}),
