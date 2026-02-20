@@ -64,9 +64,10 @@ export async function generateMetadata({
       siteName: "yusufkaanklc.dev",
       type: "article",
       locale: "en_US",
+      publishedTime: announcement.date,
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: announcement.title,
       description: announcement.summary,
     },
@@ -90,7 +91,7 @@ export default async function AnnouncementDetailPage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: announcement.title,
     description: announcement.summary,
     datePublished: announcement.date,
@@ -102,12 +103,35 @@ export default async function AnnouncementDetailPage({
     url: `https://yusufkaanklc.dev/announcements/${announcement.slug}`,
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://yusufkaanklc.dev",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: announcement.title,
+        item: `https://yusufkaanklc.dev/announcements/${announcement.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
       <ThemeApplier />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <div className="min-h-screen bg-bg-secondary text-fg font-mono">
         <div className="max-w-3xl mx-auto px-4 py-8">

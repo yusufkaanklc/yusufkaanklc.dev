@@ -63,6 +63,8 @@ export async function generateMetadata({
       siteName: "yusufkaanklc.dev",
       type: "article",
       locale: "en_US",
+      publishedTime: post.date,
+      tags: post.tags,
       ...(post.coverImage && { images: [{ url: post.coverImage }] }),
     },
     twitter: {
@@ -105,12 +107,35 @@ export default async function BlogDetailPage({
     url: `https://yusufkaanklc.dev/blog/${post.slug}`,
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://yusufkaanklc.dev",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: post.title,
+        item: `https://yusufkaanklc.dev/blog/${post.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
       <ThemeApplier />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <div className="min-h-screen bg-bg-secondary text-fg font-mono">
         <div className="max-w-3xl mx-auto px-4 py-8">

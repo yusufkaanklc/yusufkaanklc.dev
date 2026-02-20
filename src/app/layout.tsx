@@ -10,6 +10,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://yusufkaanklc.dev"),
+  applicationName: "yusufkaanklc.dev",
   title: "Yusuf Kaan Kilic | Full Stack Developer",
   description:
     "Interactive terminal-style portfolio of Yusuf Kaan Kilic — Full Stack Developer specializing in React, Next.js, TypeScript, and Node.js.",
@@ -23,6 +24,14 @@ export const metadata: Metadata = {
     "Web Developer",
   ],
   authors: [{ name: "Yusuf Kaan Kilic" }],
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
   openGraph: {
     title: "Yusuf Kaan Kilic | Full Stack Developer",
     description:
@@ -51,7 +60,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const personLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Yusuf Kaan Kilic",
@@ -63,12 +72,27 @@ export default function RootLayout({
     ],
   };
 
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "yusufkaanklc.dev",
+    url: "https://yusufkaanklc.dev",
+    author: {
+      "@type": "Person",
+      name: "Yusuf Kaan Kilic",
+    },
+  };
+
   return (
     <html lang="en" className={jetbrainsMono.variable}>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
         />
       </head>
       <body className="antialiased bg-bg-secondary text-fg">
