@@ -4,7 +4,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
-import { ThemeApplier, ReaderCount } from "./BlogClientParts";
+import { ThemeApplier, ReaderCount, LikeButton, ShareButtons } from "./BlogClientParts";
 
 interface BlogPostData {
   title: string;
@@ -192,6 +192,12 @@ export default async function BlogDetailPage({
               <ReactMarkdown>{post.content}</ReactMarkdown>
             </article>
           )}
+
+          {/* Engagement Bar */}
+          <div className="flex items-center justify-between border-t border-fg-dim/20 pt-6 mt-8">
+            <LikeButton slug={post.slug} />
+            <ShareButtons slug={post.slug} title={post.title} />
+          </div>
         </div>
       </div>
     </>
