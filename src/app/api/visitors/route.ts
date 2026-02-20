@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import { Visitor } from "@/lib/models/Visitor";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export async function GET() {
   try {
@@ -18,8 +19,7 @@ export async function POST() {
     await connectDB();
 
     const headersList = await headers();
-    const forwarded = headersList.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+    const ip = getClientIp(headersList);
 
     await Visitor.findOneAndUpdate(
       { ip },

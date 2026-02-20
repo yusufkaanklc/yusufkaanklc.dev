@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { BlogReader } from "@/lib/models/BlogReader";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -25,8 +26,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const headersList = await headers();
-    const forwarded = headersList.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+    const ip = getClientIp(headersList);
 
     await BlogReader.findOneAndUpdate(
       { blogPostId: post._id, ip },

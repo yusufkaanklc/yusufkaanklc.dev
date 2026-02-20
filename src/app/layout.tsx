@@ -9,6 +9,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://yusufkaanklc.dev"),
   title: "Yusuf Kaan Kilic | Full Stack Developer",
   description:
     "Interactive terminal-style portfolio of Yusuf Kaan Kilic — Full Stack Developer specializing in React, Next.js, TypeScript, and Node.js.",
@@ -30,12 +31,14 @@ export const metadata: Metadata = {
     siteName: "yusufkaanklc.dev",
     type: "website",
     locale: "en_US",
+    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Yusuf Kaan Kilic | Full Stack Developer",
     description:
       "Interactive terminal-style portfolio — Full Stack Developer specializing in modern web technologies.",
+    images: ["/og-default.png"],
   },
   robots: {
     index: true,

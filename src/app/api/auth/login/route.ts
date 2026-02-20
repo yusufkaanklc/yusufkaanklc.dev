@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { verifyPassword, signToken } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const ip = getClientIp(request.headers);
     const { allowed, retryAfterSeconds } = checkRateLimit(ip);
 
     if (!allowed) {
