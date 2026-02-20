@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -97,6 +98,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-bg-secondary text-fg">
         {children}
+        <GoogleAnalytics gaId="G-2ZMVGH2PND" />
       </body>
     </html>
   );
