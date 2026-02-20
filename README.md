@@ -20,6 +20,7 @@ Interactive terminal-style portfolio website built with Next.js, TypeScript, and
 - Mobile quick command bar
 - Admin panel (`sudo` command) with full CRUD for all data
 - Dynamic data from MongoDB with static fallback
+- Blog like (IP-based, toggle) and share (X, LinkedIn, copy link) on blog posts
 
 ## Getting Started
 
@@ -89,6 +90,7 @@ src/
 │   ├── admin/          # Admin panel pages
 │   ├── api/
 │   │   ├── auth/       # Login, logout, session check
+│   │   ├── blog/[slug] # Likes & readers endpoints
 │   │   ├── data/       # Public read-only data endpoint
 │   │   └── admin/      # Protected CRUD endpoints
 │   ├── layout.tsx
