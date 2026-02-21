@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "https://yusufkaanklc.dev",
+  },
 };
 
 export default function RootLayout({
