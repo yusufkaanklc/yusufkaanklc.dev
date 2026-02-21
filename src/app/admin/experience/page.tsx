@@ -5,15 +5,7 @@ import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface ExperienceItem {
-  _id?: string;
-  role: string;
-  company: string;
-  location: string;
-  period: string;
-  description: string;
-}
+import type { ExperienceItem } from "@/types/admin";
 
 const emptyExp: ExperienceItem = { role: "", company: "", location: "", period: "", description: "" };
 

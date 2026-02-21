@@ -5,20 +5,7 @@ import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface EduItem {
-  _id?: string;
-  degree: string;
-  school: string;
-  period: string;
-  description?: string;
-}
-
-interface CertItem {
-  _id?: string;
-  name: string;
-  issuer: string;
-}
+import type { EduItem, CertItem } from "@/types/admin";
 
 const emptyEdu: EduItem = { degree: "", school: "", period: "", description: "" };
 const emptyCert: CertItem = { name: "", issuer: "" };

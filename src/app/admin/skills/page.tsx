@@ -6,12 +6,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input } from "@/components/admin/FormField";
 import { TagInput } from "@/components/admin/TagInput";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface SkillItem {
-  _id?: string;
-  name: string;
-  skills: string[];
-}
+import type { SkillItem } from "@/types/admin";
 
 const emptySkill: SkillItem = { name: "", skills: [] };
 

@@ -6,15 +6,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { TagInput } from "@/components/admin/TagInput";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface ProjectItem {
-  _id?: string;
-  name: string;
-  description: string;
-  tech: string[];
-  url?: string;
-  github?: string;
-}
+import type { ProjectItem } from "@/types/admin";
 
 const emptyProject: ProjectItem = { name: "", description: "", tech: [], url: "", github: "" };
 

@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/admin/FormField";
 import { FormSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface ContactData {
-  email: string;
-  phone: string;
-  location: string;
-  availability: string;
-}
+import type { ContactData } from "@/types/admin";
 
 const emptyContact: ContactData = { email: "", phone: "", location: "", availability: "" };
 

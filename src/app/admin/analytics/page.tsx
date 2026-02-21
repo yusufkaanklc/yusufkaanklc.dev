@@ -1,55 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
+import { countryFlag, formatDate } from "@/utils/formatters";
+import type { Visitor, Reader, AnalyticsData } from "@/types/admin";
 
-interface Visitor {
-  _id: string;
-  ip: string;
-  country?: string;
-  countryCode?: string;
-  city?: string;
-  regionName?: string;
-  isp?: string;
-  visitedAt: string;
-}
-
-interface Reader {
-  _id: string;
-  ip: string;
-  country?: string;
-  countryCode?: string;
-  city?: string;
-  regionName?: string;
-  isp?: string;
-  readAt: string;
-}
-
-interface BlogReaderGroup {
-  blogPostId: string;
-  title: string;
-  slug: string;
-  readerCount: number;
-  readers: Reader[];
-}
-
-interface AnalyticsData {
-  visitors: Visitor[];
-  visitorCount: number;
-  blogReaders: BlogReaderGroup[];
-  totalReaderCount: number;
-}
-
-const countryFlag = (code?: string) => {
-  if (!code) return "";
-  return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
-};
-
-const formatDate = (d: string) => new Date(d).toLocaleString("en-GB", {
-  day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
-});
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -57,6 +14,8 @@ export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<"visitors" | "readers">("visitors");
   const [selectedBlog, setSelectedBlog] = useState<string>("");
   const [confirm, setConfirm] = useState<{ title: string; message: string; action: () => Promise<void> } | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -72,6 +31,16 @@ export default function AnalyticsPage() {
   }, [selectedBlog]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const deleteVisitor = async (visitor: Visitor) => {
     await fetch(`/api/admin/analytics/visitors/${visitor._id}`, { method: "DELETE" });
@@ -211,17 +180,40 @@ export default function AnalyticsPage() {
       ) : (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={selectedBlog}
-              onChange={(e) => setSelectedBlog(e.target.value)}
-              className="min-w-0 flex-1 basis-48 px-3 py-2 text-sm rounded-lg bg-bg border border-fg-dim/15 text-fg focus:border-accent/50 focus:outline-none transition-colors truncate"
-            >
-              {data?.blogReaders.map((b) => (
-                <option key={b.blogPostId} value={b.blogPostId}>
-                  {b.title} ({b.readerCount} readers)
-                </option>
-              ))}
-            </select>
+            <div ref={dropdownRef} className="relative min-w-0 flex-1 basis-48">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-lg bg-bg border border-fg-dim/15 text-fg hover:border-accent/50 focus:border-accent/50 focus:outline-none transition-colors"
+              >
+                <span className="truncate">
+                  {selectedBlogData ? `${selectedBlogData.title} (${selectedBlogData.readerCount} readers)` : "Select blog..."}
+                </span>
+                <svg className={`w-4 h-4 shrink-0 text-fg-dim transition-transform ${dropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {dropdownOpen && (
+                <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-lg bg-bg border border-fg-dim/15 shadow-lg py-1">
+                  {data?.blogReaders.map((b) => (
+                    <li
+                      key={b.blogPostId}
+                      onClick={() => {
+                        setSelectedBlog(b.blogPostId);
+                        setDropdownOpen(false);
+                      }}
+                      className={`px-3 py-2 text-sm cursor-pointer truncate transition-colors ${
+                        b.blogPostId === selectedBlog
+                          ? "bg-accent/10 text-accent"
+                          : "text-fg hover:bg-fg-dim/10"
+                      }`}
+                    >
+                      {b.title} ({b.readerCount} readers)
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             {selectedBlogData && selectedBlogData.readerCount > 0 && (
               <button
                 onClick={() =>

@@ -1,14 +1,9 @@
 import { type Announcement } from "@/data/announcements";
-
-const priorityColors = {
-  normal: "text-accent",
-  important: "text-t-yellow",
-  critical: "text-t-red",
-};
+import { priorityTextColors } from "@/utils/priority";
 
 export function AnnouncementEntry({ announcement }: { announcement: Announcement }) {
   const href = `/announcements/${announcement.slug}`;
-  const color = priorityColors[announcement.priority];
+  const color = priorityTextColors[announcement.priority];
 
   return (
     <div className="border-l-2 border-accent/30 pl-3 py-1">

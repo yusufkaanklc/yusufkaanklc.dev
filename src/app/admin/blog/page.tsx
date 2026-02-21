@@ -5,20 +5,8 @@ import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface BlogItem {
-  _id?: string;
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  coverImage?: string;
-  readingTime?: number;
-  published: boolean;
-  url?: string;
-}
+import { generateSlug } from "@/utils/slug";
+import type { BlogItem } from "@/types/admin";
 
 const emptyPost: BlogItem = {
   title: "",
@@ -31,15 +19,6 @@ const emptyPost: BlogItem = {
   published: false,
   url: "",
 };
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 export default function BlogPage() {
   const [items, setItems] = useState<BlogItem[]>([]);

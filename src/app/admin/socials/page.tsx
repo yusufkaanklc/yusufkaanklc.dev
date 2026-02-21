@@ -5,13 +5,7 @@ import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface SocialItem {
-  _id?: string;
-  name: string;
-  url: string;
-  icon: string;
-}
+import type { SocialItem } from "@/types/admin";
 
 const emptySocial: SocialItem = { name: "", url: "", icon: "" };
 

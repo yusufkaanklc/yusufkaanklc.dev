@@ -2,42 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { connectDB } from "@/lib/mongodb";
-import { Announcement } from "@/lib/models/Announcement";
+import { getAnnouncement } from "@/lib/fetchers";
+import { priorityTextColors } from "@/utils/priority";
 import { ThemeApplier } from "@/app/blog/[slug]/BlogClientParts";
-
-interface AnnouncementData {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  priority: "normal" | "important" | "critical";
-}
-
-const priorityColors = {
-  normal: "text-accent",
-  important: "text-t-yellow",
-  critical: "text-t-red",
-};
-
-async function getAnnouncement(slug: string): Promise<AnnouncementData | null> {
-  try {
-    await connectDB();
-    const item = await Announcement.findOne({ slug, published: true }).lean();
-    if (!item) return null;
-    return {
-      title: item.title,
-      slug: item.slug,
-      date: item.date,
-      summary: item.summary,
-      content: item.content,
-      priority: item.priority,
-    };
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -151,7 +118,7 @@ export default async function AnnouncementDetailPage({
             <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-4">
               <span>{announcement.date}</span>
               <span className="text-fg-dim/40">|</span>
-              <span className={`font-medium capitalize ${priorityColors[announcement.priority]}`}>
+              <span className={`font-medium capitalize ${priorityTextColors[announcement.priority]}`}>
                 {announcement.priority}
               </span>
             </div>

@@ -5,17 +5,9 @@ import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface AnnouncementItem {
-  _id?: string;
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  priority: "normal" | "important" | "critical";
-  published: boolean;
-}
+import { generateSlug } from "@/utils/slug";
+import { priorityColors } from "@/utils/priority";
+import type { AnnouncementItem } from "@/types/admin";
 
 const emptyAnnouncement: AnnouncementItem = {
   title: "",
@@ -25,21 +17,6 @@ const emptyAnnouncement: AnnouncementItem = {
   content: "",
   priority: "normal",
   published: false,
-};
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-const priorityColors = {
-  normal: { bg: "bg-accent/10", text: "text-accent", border: "border-accent/20" },
-  important: { bg: "bg-t-yellow/10", text: "text-t-yellow", border: "border-t-yellow/20" },
-  critical: { bg: "bg-t-red/10", text: "text-t-red", border: "border-t-red/20" },
 };
 
 export default function AnnouncementsPage() {

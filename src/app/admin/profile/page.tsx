@@ -3,18 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { FormSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface ProfileData {
-  name: string;
-  username: string;
-  title: string;
-  bio: string;
-  location: string;
-  email: string;
-  phone: string;
-  website: string;
-  resumeUrl: string;
-}
+import type { ProfileData } from "@/types/admin";
 
 const emptyProfile: ProfileData = {
   name: "",

@@ -2,40 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { connectDB } from "@/lib/mongodb";
-import { BlogPost } from "@/lib/models/BlogPost";
+import { getPost } from "@/lib/fetchers";
 import { ThemeApplier, ReaderCount, LikeButton, ShareButtons } from "./BlogClientParts";
-
-interface BlogPostData {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  coverImage?: string;
-  readingTime: number;
-}
-
-async function getPost(slug: string): Promise<BlogPostData | null> {
-  try {
-    await connectDB();
-    const post = await BlogPost.findOne({ slug, published: true }).lean();
-    if (!post) return null;
-    return {
-      title: post.title,
-      slug: post.slug,
-      date: post.date,
-      summary: post.summary,
-      content: post.content,
-      tags: post.tags,
-      coverImage: post.coverImage,
-      readingTime: post.readingTime,
-    };
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata({
   params,

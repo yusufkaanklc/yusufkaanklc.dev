@@ -3,19 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CardSkeleton } from "@/components/admin/LoadingSkeleton";
-
-interface Stats {
-  projects: number;
-  blogPosts: number;
-  skills: number;
-  experiences: number;
-  education: number;
-  certificates: number;
-  socials: number;
-  announcements: number;
-  visitors: number;
-  totalReaders: number;
-}
+import type { Stats } from "@/types/admin";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
