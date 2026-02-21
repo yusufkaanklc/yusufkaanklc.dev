@@ -3,12 +3,22 @@ import mongoose, { Schema, type Document } from "mongoose";
 export interface IBlogReader extends Document {
   blogPostId: mongoose.Types.ObjectId;
   ip: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  regionName?: string;
+  isp?: string;
   readAt: Date;
 }
 
 const BlogReaderSchema = new Schema<IBlogReader>({
   blogPostId: { type: Schema.Types.ObjectId, ref: "BlogPost", required: true },
   ip: { type: String, required: true },
+  country: { type: String },
+  countryCode: { type: String },
+  city: { type: String },
+  regionName: { type: String },
+  isp: { type: String },
   readAt: { type: Date, default: Date.now },
 });
 

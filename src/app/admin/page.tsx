@@ -13,6 +13,8 @@ interface Stats {
   certificates: number;
   socials: number;
   announcements: number;
+  visitors: number;
+  totalReaders: number;
 }
 
 export default function AdminDashboard() {
@@ -23,7 +25,9 @@ export default function AdminDashboard() {
     Promise.all([
       fetch("/api/data").then((r) => r.json()),
       fetch("/api/admin/announcements").then((r) => r.json()),
-    ]).then(([data, announcements]) => {
+      fetch("/api/visitors").then((r) => r.json()),
+      fetch("/api/admin/analytics").then((r) => r.json()),
+    ]).then(([data, announcements, visitors, analytics]) => {
       setStats({
         projects: data.projects?.length ?? 0,
         blogPosts: data.blogPosts?.length ?? 0,
@@ -33,6 +37,8 @@ export default function AdminDashboard() {
         certificates: data.certificates?.length ?? 0,
         socials: data.socials?.length ?? 0,
         announcements: Array.isArray(announcements) ? announcements.length : 0,
+        visitors: visitors?.count ?? 0,
+        totalReaders: analytics?.totalReaderCount ?? 0,
       });
     });
   }, []);
@@ -47,6 +53,8 @@ export default function AdminDashboard() {
         { label: "Education", count: stats.education, href: "/admin/education" },
         { label: "Certificates", count: stats.certificates, href: "/admin/education" },
         { label: "Social Links", count: stats.socials, href: "/admin/socials" },
+        { label: "Visitors", count: stats.visitors, href: "/admin/analytics" },
+        { label: "Total Readers", count: stats.totalReaders, href: "/admin/analytics" },
       ]
     : [];
 
@@ -58,7 +66,7 @@ export default function AdminDashboard() {
       </div>
 
       {!stats ? (
-        <CardSkeleton count={8} />
+        <CardSkeleton count={10} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {cards.map((card) => (

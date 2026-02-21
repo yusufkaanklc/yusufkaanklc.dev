@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import { Visitor } from "@/lib/models/Visitor";
 import { getClientIp } from "@/lib/get-client-ip";
+import { getIpGeo } from "@/lib/ip-geo";
 
 export async function GET() {
   try {
@@ -21,11 +22,28 @@ export async function POST() {
     const headersList = await headers();
     const ip = getClientIp(headersList);
 
-    await Visitor.findOneAndUpdate(
-      { ip },
-      { ip, visitedAt: new Date() },
-      { upsert: true }
-    );
+    const existing = await Visitor.findOne({ ip });
+    if (existing) {
+      existing.visitedAt = new Date();
+      if (!existing.country) {
+        const geo = await getIpGeo(ip);
+        if (geo) Object.assign(existing, geo);
+      }
+      await existing.save();
+    } else {
+      const geo = await getIpGeo(ip);
+      await Visitor.create({
+        ip,
+        visitedAt: new Date(),
+        ...(geo && {
+          country: geo.country,
+          countryCode: geo.countryCode,
+          city: geo.city,
+          regionName: geo.regionName,
+          isp: geo.isp,
+        }),
+      });
+    }
 
     const count = await Visitor.countDocuments();
     return NextResponse.json({ count });

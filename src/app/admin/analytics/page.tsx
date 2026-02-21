@@ -1,0 +1,310 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { DataTable } from "@/components/admin/DataTable";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
+
+interface Visitor {
+  _id: string;
+  ip: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  regionName?: string;
+  isp?: string;
+  visitedAt: string;
+}
+
+interface Reader {
+  _id: string;
+  ip: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  regionName?: string;
+  isp?: string;
+  readAt: string;
+}
+
+interface BlogReaderGroup {
+  blogPostId: string;
+  title: string;
+  slug: string;
+  readerCount: number;
+  readers: Reader[];
+}
+
+interface AnalyticsData {
+  visitors: Visitor[];
+  visitorCount: number;
+  blogReaders: BlogReaderGroup[];
+  totalReaderCount: number;
+}
+
+const countryFlag = (code?: string) => {
+  if (!code) return "";
+  return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+};
+
+const formatDate = (d: string) => new Date(d).toLocaleString("en-GB", {
+  day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+});
+
+export default function AnalyticsPage() {
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"visitors" | "readers">("visitors");
+  const [selectedBlog, setSelectedBlog] = useState<string>("");
+  const [confirm, setConfirm] = useState<{ title: string; message: string; action: () => Promise<void> } | null>(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    fetch("/api/admin/analytics")
+      .then((r) => r.json())
+      .then((d: AnalyticsData) => {
+        setData(d);
+        if (!selectedBlog && d.blogReaders.length > 0) {
+          setSelectedBlog(d.blogReaders[0].blogPostId);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [selectedBlog]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const deleteVisitor = async (visitor: Visitor) => {
+    await fetch(`/api/admin/analytics/visitors/${visitor._id}`, { method: "DELETE" });
+    load();
+  };
+
+  const deleteAllVisitors = async () => {
+    await fetch("/api/admin/analytics/visitors", { method: "DELETE" });
+    load();
+  };
+
+  const deleteReader = async (reader: Reader) => {
+    await fetch(`/api/admin/analytics/readers/${reader._id}`, { method: "DELETE" });
+    load();
+  };
+
+  const deleteAllReaders = async () => {
+    await fetch("/api/admin/analytics/readers", { method: "DELETE" });
+    load();
+  };
+
+  const deleteBlogReaders = async (blogPostId: string) => {
+    await fetch(`/api/admin/analytics/readers?blogPostId=${blogPostId}`, { method: "DELETE" });
+    load();
+  };
+
+  const selectedBlogData = data?.blogReaders.find((b) => b.blogPostId === selectedBlog);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <h2 className="text-lg font-bold text-accent">Analytics</h2>
+        <span className="text-fg-dim/40 text-xs font-mono">~/analytics</span>
+      </div>
+
+      {/* Stats */}
+      {data && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="admin-card p-4">
+            <p className="text-2xl font-bold text-accent">{data.visitorCount}</p>
+            <p className="text-xs text-fg-dim mt-1 font-mono">Total Visitors</p>
+          </div>
+          <div className="admin-card p-4">
+            <p className="text-2xl font-bold text-accent">{data.totalReaderCount}</p>
+            <p className="text-xs text-fg-dim mt-1 font-mono">Total Readers</p>
+          </div>
+          <div className="admin-card p-4">
+            <p className="text-2xl font-bold text-accent">{data.blogReaders.length}</p>
+            <p className="text-xs text-fg-dim mt-1 font-mono">Blog Posts</p>
+          </div>
+          <div className="admin-card p-4">
+            <p className="text-2xl font-bold text-accent">
+              {new Set(data.visitors.map((v) => v.countryCode).filter(Boolean)).size}
+            </p>
+            <p className="text-xs text-fg-dim mt-1 font-mono">Countries</p>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-fg-dim/10">
+        {(["visitors", "readers"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px capitalize ${
+              activeTab === tab
+                ? "border-accent text-accent"
+                : "border-transparent text-fg-dim hover:text-fg"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <LoadingSkeleton rows={8} />
+      ) : activeTab === "visitors" ? (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              onClick={() =>
+                setConfirm({
+                  title: "Delete All Visitors",
+                  message: `Delete all ${data?.visitorCount ?? 0} visitor records? This cannot be undone.`,
+                  action: deleteAllVisitors,
+                })
+              }
+              className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium"
+            >
+              Delete All Visitors
+            </button>
+          </div>
+          <DataTable
+            columns={[
+              { key: "ip", label: "IP Address", render: (v: Visitor) => <span className="font-mono text-xs">{v.ip}</span> },
+              {
+                key: "country",
+                label: "Country",
+                render: (v: Visitor) =>
+                  v.country ? (
+                    <span className="text-xs">
+                      {countryFlag(v.countryCode)} {v.country}
+                    </span>
+                  ) : (
+                    <span className="text-fg-dim text-xs">-</span>
+                  ),
+              },
+              {
+                key: "city",
+                label: "Location",
+                render: (v: Visitor) =>
+                  v.city ? (
+                    <span className="text-xs text-fg-dim">
+                      {v.city}{v.regionName ? `, ${v.regionName}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-fg-dim text-xs">-</span>
+                  ),
+              },
+              {
+                key: "isp",
+                label: "ISP",
+                render: (v: Visitor) => <span className="text-xs text-fg-dim">{v.isp || "-"}</span>,
+              },
+              {
+                key: "visitedAt",
+                label: "Last Visit",
+                render: (v: Visitor) => <span className="text-xs text-fg-dim font-mono">{formatDate(v.visitedAt)}</span>,
+              },
+            ]}
+            data={data?.visitors ?? []}
+            onDelete={(v) => deleteVisitor(v)}
+          />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <select
+              value={selectedBlog}
+              onChange={(e) => setSelectedBlog(e.target.value)}
+              className="px-3 py-2 text-sm rounded-lg bg-bg border border-fg-dim/15 text-fg focus:border-accent/50 focus:outline-none transition-colors"
+            >
+              {data?.blogReaders.map((b) => (
+                <option key={b.blogPostId} value={b.blogPostId}>
+                  {b.title} ({b.readerCount} readers)
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2 sm:ml-auto">
+              {selectedBlogData && selectedBlogData.readerCount > 0 && (
+                <button
+                  onClick={() =>
+                    setConfirm({
+                      title: "Delete Blog Readers",
+                      message: `Delete all ${selectedBlogData.readerCount} readers for "${selectedBlogData.title}"?`,
+                      action: () => deleteBlogReaders(selectedBlog),
+                    })
+                  }
+                  className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium"
+                >
+                  Delete Blog Readers
+                </button>
+              )}
+              <button
+                onClick={() =>
+                  setConfirm({
+                    title: "Delete All Readers",
+                    message: `Delete all ${data?.totalReaderCount ?? 0} reader records across all blogs? This cannot be undone.`,
+                    action: deleteAllReaders,
+                  })
+                }
+                className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium"
+              >
+                Delete All Readers
+              </button>
+            </div>
+          </div>
+          <DataTable
+            columns={[
+              { key: "ip", label: "IP Address", render: (r: Reader) => <span className="font-mono text-xs">{r.ip}</span> },
+              {
+                key: "country",
+                label: "Country",
+                render: (r: Reader) =>
+                  r.country ? (
+                    <span className="text-xs">
+                      {countryFlag(r.countryCode)} {r.country}
+                    </span>
+                  ) : (
+                    <span className="text-fg-dim text-xs">-</span>
+                  ),
+              },
+              {
+                key: "city",
+                label: "Location",
+                render: (r: Reader) =>
+                  r.city ? (
+                    <span className="text-xs text-fg-dim">
+                      {r.city}{r.regionName ? `, ${r.regionName}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-fg-dim text-xs">-</span>
+                  ),
+              },
+              {
+                key: "isp",
+                label: "ISP",
+                render: (r: Reader) => <span className="text-xs text-fg-dim">{r.isp || "-"}</span>,
+              },
+              {
+                key: "readAt",
+                label: "Read At",
+                render: (r: Reader) => <span className="text-xs text-fg-dim font-mono">{formatDate(r.readAt)}</span>,
+              },
+            ]}
+            data={selectedBlogData?.readers ?? []}
+            onDelete={(r) => deleteReader(r)}
+          />
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ""}
+        message={confirm?.message ?? ""}
+        onConfirm={async () => {
+          if (confirm) await confirm.action();
+          setConfirm(null);
+        }}
+        onCancel={() => setConfirm(null)}
+      />
+    </div>
+  );
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface Column<T> {
   key: string;
   label: string;
@@ -11,9 +13,12 @@ interface DataTableProps<T> {
   data: T[];
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  pageSize?: number;
 }
 
-export function DataTable<T extends { _id?: string }>({ columns, data, onEdit, onDelete }: DataTableProps<T>) {
+export function DataTable<T extends { _id?: string }>({ columns, data, onEdit, onDelete, pageSize = 10 }: DataTableProps<T>) {
+  const [page, setPage] = useState(0);
+
   if (data.length === 0) {
     return (
       <div className="admin-section text-center py-12">
@@ -22,55 +27,122 @@ export function DataTable<T extends { _id?: string }>({ columns, data, onEdit, o
     );
   }
 
+  const totalPages = Math.ceil(data.length / pageSize);
+  const paged = data.slice(page * pageSize, (page + 1) * pageSize);
+
   return (
-    <div className="admin-section p-0 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-fg-dim/10 bg-bg-secondary/50">
-              {columns.map((col) => (
-                <th key={col.key} className="text-left py-3 px-4 text-fg-dim font-medium text-xs uppercase tracking-wider">
-                  {col.label}
-                </th>
-              ))}
-              {(onEdit || onDelete) && (
-                <th className="text-right py-3 px-4 text-fg-dim font-medium text-xs uppercase tracking-wider">Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, i) => (
-              <tr key={item._id || i} className="border-b border-fg-dim/5 last:border-0 hover:bg-accent/[0.03] transition-colors">
+    <div className="space-y-3">
+      <div className="admin-section p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-fg-dim/10 bg-bg-secondary/50">
                 {columns.map((col) => (
-                  <td key={col.key} className="py-3 px-4 text-fg-muted">
-                    {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? "")}
-                  </td>
+                  <th key={col.key} className="text-left py-3 px-4 text-fg-dim font-medium text-xs uppercase tracking-wider">
+                    {col.label}
+                  </th>
                 ))}
                 {(onEdit || onDelete) && (
-                  <td className="py-3 px-4 text-right space-x-1">
-                    {onEdit && (
-                      <button
-                        onClick={() => onEdit(item)}
-                        className="text-accent/70 hover:text-accent text-xs transition-colors px-2 py-1 rounded hover:bg-accent/10"
-                      >
-                        Edit
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="text-t-red/60 hover:text-t-red text-xs transition-colors px-2 py-1 rounded hover:bg-t-red/10"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </td>
+                  <th className="text-right py-3 px-4 text-fg-dim font-medium text-xs uppercase tracking-wider">Actions</th>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paged.map((item, i) => (
+                <tr key={item._id || page * pageSize + i} className="border-b border-fg-dim/5 last:border-0 hover:bg-accent/[0.03] transition-colors">
+                  {columns.map((col) => (
+                    <td key={col.key} className="py-3 px-4 text-fg-muted">
+                      {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? "")}
+                    </td>
+                  ))}
+                  {(onEdit || onDelete) && (
+                    <td className="py-3 px-4 text-right space-x-1">
+                      {onEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="text-accent/70 hover:text-accent text-xs transition-colors px-2 py-1 rounded hover:bg-accent/10"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          className="text-t-red/60 hover:text-t-red text-xs transition-colors px-2 py-1 rounded hover:bg-t-red/10"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-fg-dim font-mono">
+            {page * pageSize + 1}-{Math.min((page + 1) * pageSize, data.length)} of {data.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(0)}
+              disabled={page === 0}
+              className="px-2 py-1 text-xs rounded border border-fg-dim/10 text-fg-dim hover:text-fg hover:border-fg-dim/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &laquo;
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="px-2 py-1 text-xs rounded border border-fg-dim/10 text-fg-dim hover:text-fg hover:border-fg-dim/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &lsaquo;
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i)
+              .filter((i) => i === 0 || i === totalPages - 1 || Math.abs(i - page) <= 1)
+              .reduce<(number | "ellipsis")[]>((acc, i, idx, arr) => {
+                if (idx > 0 && i - (arr[idx - 1] as number) > 1) acc.push("ellipsis");
+                acc.push(i);
+                return acc;
+              }, [])
+              .map((item, idx) =>
+                item === "ellipsis" ? (
+                  <span key={`e${idx}`} className="px-1 text-xs text-fg-dim">...</span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => setPage(item)}
+                    className={`min-w-[28px] py-1 text-xs rounded border transition-colors ${
+                      page === item
+                        ? "bg-accent/10 text-accent border-accent/20"
+                        : "border-fg-dim/10 text-fg-dim hover:text-fg hover:border-fg-dim/20"
+                    }`}
+                  >
+                    {item + 1}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              className="px-2 py-1 text-xs rounded border border-fg-dim/10 text-fg-dim hover:text-fg hover:border-fg-dim/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &rsaquo;
+            </button>
+            <button
+              onClick={() => setPage(totalPages - 1)}
+              disabled={page === totalPages - 1}
+              className="px-2 py-1 text-xs rounded border border-fg-dim/10 text-fg-dim hover:text-fg hover:border-fg-dim/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &raquo;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
