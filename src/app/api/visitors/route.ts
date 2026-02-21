@@ -21,17 +21,18 @@ export async function POST() {
 
     const headersList = await headers();
     const ip = getClientIp(headersList);
+    const cfCountry = headersList.get("cf-ipcountry");
 
     const existing = await Visitor.findOne({ ip });
     if (existing) {
       existing.visitedAt = new Date();
       if (!existing.country) {
-        const geo = await getIpGeo(ip);
+        const geo = await getIpGeo(ip, cfCountry);
         if (geo) Object.assign(existing, geo);
       }
       await existing.save();
     } else {
-      const geo = await getIpGeo(ip);
+      const geo = await getIpGeo(ip, cfCountry);
       await Visitor.create({
         ip,
         visitedAt: new Date(),

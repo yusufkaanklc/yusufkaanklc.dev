@@ -28,17 +28,18 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
 
     const headersList = await headers();
     const ip = getClientIp(headersList);
+    const cfCountry = headersList.get("cf-ipcountry");
 
     const existing = await BlogReader.findOne({ blogPostId: post._id, ip });
     if (existing) {
       existing.readAt = new Date();
       if (!existing.country) {
-        const geo = await getIpGeo(ip);
+        const geo = await getIpGeo(ip, cfCountry);
         if (geo) Object.assign(existing, geo);
       }
       await existing.save();
     } else {
-      const geo = await getIpGeo(ip);
+      const geo = await getIpGeo(ip, cfCountry);
       await BlogReader.create({
         blogPostId: post._id,
         ip,
