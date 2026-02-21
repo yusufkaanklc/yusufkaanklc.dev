@@ -210,11 +210,11 @@ export default function AnalyticsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={selectedBlog}
               onChange={(e) => setSelectedBlog(e.target.value)}
-              className="px-3 py-2 text-sm rounded-lg bg-bg border border-fg-dim/15 text-fg focus:border-accent/50 focus:outline-none transition-colors"
+              className="min-w-0 flex-1 basis-48 px-3 py-2 text-sm rounded-lg bg-bg border border-fg-dim/15 text-fg focus:border-accent/50 focus:outline-none transition-colors truncate"
             >
               {data?.blogReaders.map((b) => (
                 <option key={b.blogPostId} value={b.blogPostId}>
@@ -222,34 +222,32 @@ export default function AnalyticsPage() {
                 </option>
               ))}
             </select>
-            <div className="flex gap-2 sm:ml-auto">
-              {selectedBlogData && selectedBlogData.readerCount > 0 && (
-                <button
-                  onClick={() =>
-                    setConfirm({
-                      title: "Delete Blog Readers",
-                      message: `Delete all ${selectedBlogData.readerCount} readers for "${selectedBlogData.title}"?`,
-                      action: () => deleteBlogReaders(selectedBlog),
-                    })
-                  }
-                  className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium"
-                >
-                  Delete Blog Readers
-                </button>
-              )}
+            {selectedBlogData && selectedBlogData.readerCount > 0 && (
               <button
                 onClick={() =>
                   setConfirm({
-                    title: "Delete All Readers",
-                    message: `Delete all ${data?.totalReaderCount ?? 0} reader records across all blogs? This cannot be undone.`,
-                    action: deleteAllReaders,
+                    title: "Delete Blog Readers",
+                    message: `Delete all ${selectedBlogData.readerCount} readers for "${selectedBlogData.title}"?`,
+                    action: () => deleteBlogReaders(selectedBlog),
                   })
                 }
-                className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium"
+                className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium whitespace-nowrap"
               >
-                Delete All Readers
+                Delete Blog Readers
               </button>
-            </div>
+            )}
+            <button
+              onClick={() =>
+                setConfirm({
+                  title: "Delete All Readers",
+                  message: `Delete all ${data?.totalReaderCount ?? 0} reader records across all blogs? This cannot be undone.`,
+                  action: deleteAllReaders,
+                })
+              }
+              className="px-3 py-2 text-xs rounded-lg bg-t-red/10 text-t-red border border-t-red/20 hover:bg-t-red/20 transition-all font-medium whitespace-nowrap"
+            >
+              Delete All Readers
+            </button>
           </div>
           <DataTable
             columns={[
