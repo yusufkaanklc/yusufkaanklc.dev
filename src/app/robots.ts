@@ -6,22 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/", "/_next/", "/uploads/"],
-      },
-      {
-        userAgent: [
-          "AhrefsBot",
-          "SemrushBot",
-          "DotBot",
-          "MJ12bot",
-          "BLEXBot",
-          "DataForSeoBot",
-          "GPTBot",
-          "CCBot",
-          "Bytespider",
-          "PetalBot",
-        ],
-        disallow: "/",
+        disallow: ["/admin/", "/api/"],
       },
     ],
     sitemap: "https://yusufkaanklc.dev/sitemap.xml",

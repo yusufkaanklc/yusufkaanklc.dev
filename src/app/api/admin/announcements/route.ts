@@ -5,7 +5,7 @@ import { announcementSchema } from "@/lib/validations";
 
 export async function GET() {
   await connectDB();
-  const announcements = await Announcement.find().lean();
+  const announcements = await Announcement.find().sort({ createdAt: -1 }).lean();
   return NextResponse.json(announcements);
 }
 

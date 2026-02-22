@@ -83,6 +83,12 @@ export default async function AnnouncementDetailPage({
       {
         "@type": "ListItem",
         position: 2,
+        name: "Announcements",
+        item: "https://yusufkaanklc.dev/announcements",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
         name: announcement.title,
         item: `https://yusufkaanklc.dev/announcements/${announcement.slug}`,
       },
@@ -105,10 +111,10 @@ export default async function AnnouncementDetailPage({
           {/* Header */}
           <div className="mb-8">
             <Link
-              href="/"
+              href="/announcements"
               className="text-accent hover:underline text-sm mb-6 inline-block"
             >
-              &larr; Back to terminal
+              &larr; Back to announcements
             </Link>
 
             <h1 className="text-2xl font-bold text-accent mb-3">

@@ -88,6 +88,12 @@ export default async function BlogDetailPage({
       {
         "@type": "ListItem",
         position: 2,
+        name: "Blog",
+        item: "https://yusufkaanklc.dev/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
         name: post.title,
         item: `https://yusufkaanklc.dev/blog/${post.slug}`,
       },
@@ -110,10 +116,10 @@ export default async function BlogDetailPage({
           {/* Header */}
           <div className="mb-8">
             <Link
-              href="/"
+              href="/blog"
               className="text-accent hover:underline text-sm mb-6 inline-block"
             >
-              &larr; Back to terminal
+              &larr; Back to blog
             </Link>
 
             {post.coverImage && (

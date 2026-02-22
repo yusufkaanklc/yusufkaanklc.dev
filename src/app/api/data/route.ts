@@ -19,14 +19,14 @@ export async function GET() {
       await Promise.all([
         Profile.findOne().lean(),
         Project.find().lean(),
-        BlogPost.find({ published: true }).lean(),
+        BlogPost.find({ published: true }).sort({ createdAt: -1 }).lean(),
         SkillCategory.find().lean(),
         Experience.find().lean(),
         Education.find().lean(),
         Certificate.find().lean(),
         Contact.findOne().lean(),
         Social.find().lean(),
-        Announcement.find({ published: true }).lean(),
+        Announcement.find({ published: true }).sort({ createdAt: -1 }).lean(),
       ]);
 
     return NextResponse.json({

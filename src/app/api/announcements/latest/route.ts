@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectDB();
     const announcement = await Announcement.findOne({ published: true })
-      .sort({ date: -1, createdAt: -1 })
+      .sort({ createdAt: -1 })
       .select("_id title slug summary priority date")
       .lean();
     return NextResponse.json(announcement ?? null);

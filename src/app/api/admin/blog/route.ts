@@ -11,7 +11,7 @@ function calculateReadingTime(content?: string): number {
 
 export async function GET() {
   await connectDB();
-  const posts = await BlogPost.find().lean();
+  const posts = await BlogPost.find().sort({ createdAt: -1 }).lean();
   return NextResponse.json(posts);
 }
 
