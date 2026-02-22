@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Visitor } from "@/lib/models/Visitor";
 import { getClientIp } from "@/lib/get-client-ip";
 import { getIpGeo } from "@/lib/ip-geo";
-import { isBot } from "@/lib/is-bot";
+import { isBot, isBotIsp } from "@/lib/is-bot";
 import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
 
 export async function GET() {
@@ -41,11 +41,20 @@ export async function POST() {
       existing.ip = ip;
       if (!existing.country) {
         const geo = await getIpGeo(ip, cfCountry);
-        if (geo) Object.assign(existing, geo);
+        if (geo) {
+          if (isBotIsp(geo.isp)) {
+            await existing.deleteOne();
+            return NextResponse.json({ count: await Visitor.countDocuments() });
+          }
+          Object.assign(existing, geo);
+        }
       }
       await existing.save();
     } else {
       const geo = await getIpGeo(ip, cfCountry);
+      if (isBotIsp(geo?.isp)) {
+        return NextResponse.json({ count: await Visitor.countDocuments() });
+      }
       await Visitor.create({
         token,
         ip,

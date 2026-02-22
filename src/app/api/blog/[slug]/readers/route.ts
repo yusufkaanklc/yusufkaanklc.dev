@@ -5,7 +5,7 @@ import { BlogPost } from "@/lib/models/BlogPost";
 import { BlogReader } from "@/lib/models/BlogReader";
 import { getClientIp } from "@/lib/get-client-ip";
 import { getIpGeo } from "@/lib/ip-geo";
-import { isBot } from "@/lib/is-bot";
+import { isBot, isBotIsp } from "@/lib/is-bot";
 import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -51,11 +51,22 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
       existing.ip = ip;
       if (!existing.country) {
         const geo = await getIpGeo(ip, cfCountry);
-        if (geo) Object.assign(existing, geo);
+        if (geo) {
+          if (isBotIsp(geo.isp)) {
+            await existing.deleteOne();
+            const count = await BlogReader.countDocuments({ blogPostId: post._id });
+            return NextResponse.json({ count });
+          }
+          Object.assign(existing, geo);
+        }
       }
       await existing.save();
     } else {
       const geo = await getIpGeo(ip, cfCountry);
+      if (isBotIsp(geo?.isp)) {
+        const count = await BlogReader.countDocuments({ blogPostId: post._id });
+        return NextResponse.json({ count });
+      }
       await BlogReader.create({
         blogPostId: post._id,
         token,

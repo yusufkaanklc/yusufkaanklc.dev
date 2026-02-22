@@ -57,3 +57,30 @@ export function isBot(headers: Headers): boolean {
   if (!ua) return true;
   return BOT_UA_PATTERNS.some((pattern) => pattern.test(ua));
 }
+
+const BOT_ISP_PATTERNS = [
+  /google/i,
+  /microsoft/i,
+  /amazon/i,
+  /facebook/i,
+  /meta platforms/i,
+  /twitter/i,
+  /yandex/i,
+  /baidu/i,
+  /bytedance/i,
+  /semrush/i,
+  /ahrefs/i,
+  /digitalocean/i,
+  /hetzner/i,
+  /ovh/i,
+  /linode/i,
+  /vultr/i,
+  /oracle/i,
+  /alibaba/i,
+  /tencent/i,
+];
+
+export function isBotIsp(isp: string | undefined): boolean {
+  if (!isp) return false;
+  return BOT_ISP_PATTERNS.some((pattern) => pattern.test(isp));
+}
