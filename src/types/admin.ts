@@ -13,7 +13,8 @@ export interface Stats {
 
 export interface Visitor {
   _id: string;
-  ip: string;
+  token: string;
+  ip?: string;
   country?: string;
   countryCode?: string;
   city?: string;
@@ -24,7 +25,8 @@ export interface Visitor {
 
 export interface Reader {
   _id: string;
-  ip: string;
+  token: string;
+  ip?: string;
   country?: string;
   countryCode?: string;
   city?: string;

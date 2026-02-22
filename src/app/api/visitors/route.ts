@@ -4,6 +4,8 @@ import { connectDB } from "@/lib/mongodb";
 import { Visitor } from "@/lib/models/Visitor";
 import { getClientIp } from "@/lib/get-client-ip";
 import { getIpGeo } from "@/lib/ip-geo";
+import { isBot } from "@/lib/is-bot";
+import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
 
 export async function GET() {
   try {
@@ -20,12 +22,23 @@ export async function POST() {
     await connectDB();
 
     const headersList = await headers();
+    if (isBot(headersList)) return NextResponse.json({ count: await Visitor.countDocuments() });
+
     const ip = getClientIp(headersList);
     const cfCountry = headersList.get("cf-ipcountry");
 
-    const existing = await Visitor.findOne({ ip });
+    let token = await getVisitorToken();
+    let needsCookie = false;
+
+    if (!token) {
+      token = generateVisitorToken();
+      needsCookie = true;
+    }
+
+    const existing = await Visitor.findOne({ token });
     if (existing) {
       existing.visitedAt = new Date();
+      existing.ip = ip;
       if (!existing.country) {
         const geo = await getIpGeo(ip, cfCountry);
         if (geo) Object.assign(existing, geo);
@@ -34,6 +47,7 @@ export async function POST() {
     } else {
       const geo = await getIpGeo(ip, cfCountry);
       await Visitor.create({
+        token,
         ip,
         visitedAt: new Date(),
         ...(geo && {
@@ -47,7 +61,13 @@ export async function POST() {
     }
 
     const count = await Visitor.countDocuments();
-    return NextResponse.json({ count });
+    const response = NextResponse.json({ count });
+
+    if (needsCookie) {
+      setVisitorTokenCookie(response, token);
+    }
+
+    return response;
   } catch {
     return NextResponse.json({ error: "Failed to record visitor" }, { status: 500 });
   }

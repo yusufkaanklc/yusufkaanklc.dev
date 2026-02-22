@@ -105,7 +105,7 @@ export function Terminal() {
 
   // Keep input focused on click
   const focusInput = useCallback(() => {
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   }, []);
 
   // Konami code message

@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
-      {loading ? (
+      {loading && !data ? (
         <LoadingSkeleton rows={8} />
       ) : activeTab === "visitors" ? (
         <div className="space-y-4">
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
           </div>
           <DataTable
             columns={[
-              { key: "ip", label: "IP Address", render: (v: Visitor) => <span className="font-mono text-xs">{v.ip}</span> },
+              { key: "ip", label: "IP Address", render: (v: Visitor) => <span className="font-mono text-xs">{v.ip || "-"}</span> },
               {
                 key: "country",
                 label: "Country",
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
           </div>
           <DataTable
             columns={[
-              { key: "ip", label: "IP Address", render: (r: Reader) => <span className="font-mono text-xs">{r.ip}</span> },
+              { key: "ip", label: "IP Address", render: (r: Reader) => <span className="font-mono text-xs">{r.ip || "-"}</span> },
               {
                 key: "country",
                 label: "Country",

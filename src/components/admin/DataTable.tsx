@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Column<T> {
   key: string;
@@ -18,6 +18,12 @@ interface DataTableProps<T> {
 
 export function DataTable<T extends { _id?: string }>({ columns, data, onEdit, onDelete, pageSize = 10 }: DataTableProps<T>) {
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (data.length === 0) return;
+    const maxPage = Math.ceil(data.length / pageSize) - 1;
+    if (page > maxPage) setPage(maxPage);
+  }, [data.length, page, pageSize]);
 
   if (data.length === 0) {
     return (

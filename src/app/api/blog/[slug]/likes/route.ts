@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { BlogLike } from "@/lib/models/BlogLike";
 import { getClientIp } from "@/lib/get-client-ip";
+import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -12,12 +13,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     const post = await BlogPost.findOne({ slug }).lean();
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const headersList = await headers();
-    const ip = getClientIp(headersList);
+    const token = await getVisitorToken();
 
     const [count, existing] = await Promise.all([
       BlogLike.countDocuments({ blogPostId: post._id }),
-      BlogLike.findOne({ blogPostId: post._id, ip }),
+      token ? BlogLike.findOne({ blogPostId: post._id, token }) : null,
     ]);
 
     return NextResponse.json({ count, liked: !!existing });
@@ -36,16 +36,30 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
     const headersList = await headers();
     const ip = getClientIp(headersList);
 
-    const existing = await BlogLike.findOne({ blogPostId: post._id, ip });
+    let token = await getVisitorToken();
+    let needsCookie = false;
+
+    if (!token) {
+      token = generateVisitorToken();
+      needsCookie = true;
+    }
+
+    const existing = await BlogLike.findOne({ blogPostId: post._id, token });
 
     if (existing) {
       await BlogLike.deleteOne({ _id: existing._id });
     } else {
-      await BlogLike.create({ blogPostId: post._id, ip, likedAt: new Date() });
+      await BlogLike.create({ blogPostId: post._id, token, ip, likedAt: new Date() });
     }
 
     const count = await BlogLike.countDocuments({ blogPostId: post._id });
-    return NextResponse.json({ count, liked: !existing });
+    const response = NextResponse.json({ count, liked: !existing });
+
+    if (needsCookie) {
+      setVisitorTokenCookie(response, token);
+    }
+
+    return response;
   } catch {
     return NextResponse.json({ error: "Failed to toggle like" }, { status: 500 });
   }

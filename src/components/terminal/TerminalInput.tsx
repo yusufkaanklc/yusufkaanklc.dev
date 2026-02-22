@@ -78,48 +78,45 @@ export const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
     }
 
     return (
-      <div className="flex items-center">
-        <span className="shrink-0 text-accent font-bold">{PROMPT_USER}</span>
-        <span className="shrink-0 text-fg-dim">@</span>
-        <span className="shrink-0 text-accent-secondary">{PROMPT_HOST}</span>
-        <span className="shrink-0 text-fg-dim">:</span>
-        <span className="shrink-0 text-prompt-path">{currentPath}</span>
-        <span className="shrink-0 text-fg-dim mr-2">$</span>
-
-        <div className="relative flex-1 min-w-[100px]">
-          <input
-            ref={localRef}
-            type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                onSubmit(value);
-              } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                onHistoryNav("up");
-              } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                onHistoryNav("down");
-              } else if (e.key === "Tab") {
-                e.preventDefault();
-                onTab();
-              } else if (e.key === "l" && e.ctrlKey) {
-                e.preventDefault();
-                onClear();
-              }
-            }}
-            className="absolute inset-0 w-full bg-transparent text-transparent caret-transparent outline-none"
-            autoCapitalize="none"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            aria-label="Terminal command input"
-          />
-          <span className="text-fg pointer-events-none whitespace-pre">{value}</span>
-          <span className="inline-block w-2 h-[1.2em] bg-accent/80 ml-px animate-blink align-middle" />
-        </div>
+      <div className="relative">
+        <input
+          ref={localRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onSubmit(value);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              onHistoryNav("up");
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              onHistoryNav("down");
+            } else if (e.key === "Tab") {
+              e.preventDefault();
+              onTab();
+            } else if (e.key === "l" && e.ctrlKey) {
+              e.preventDefault();
+              onClear();
+            }
+          }}
+          className="absolute opacity-0 inset-0 w-full h-full z-10"
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          aria-label="Terminal command input"
+        />
+        <span className="text-accent font-bold">{PROMPT_USER}</span>
+        <span className="text-fg-dim">@</span>
+        <span className="text-accent-secondary">{PROMPT_HOST}</span>
+        <span className="text-fg-dim">:</span>
+        <span className="text-prompt-path">{currentPath}</span>
+        <span className="text-fg-dim mr-2">$</span>
+        <span className="text-fg whitespace-pre-wrap break-all">{value}</span>
+        <span className="inline-block w-2 h-[1.2em] bg-accent/80 ml-px animate-blink align-middle" />
       </div>
     );
   }

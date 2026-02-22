@@ -1,7 +1,8 @@
 import mongoose, { Schema, type Document } from "mongoose";
 
 export interface IVisitor extends Document {
-  ip: string;
+  token: string;
+  ip?: string;
   country?: string;
   countryCode?: string;
   city?: string;
@@ -11,7 +12,8 @@ export interface IVisitor extends Document {
 }
 
 const VisitorSchema = new Schema<IVisitor>({
-  ip: { type: String, required: true, unique: true },
+  token: { type: String, required: true, unique: true },
+  ip: { type: String },
   country: { type: String },
   countryCode: { type: String },
   city: { type: String },

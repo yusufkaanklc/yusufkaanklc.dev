@@ -5,6 +5,8 @@ import { BlogPost } from "@/lib/models/BlogPost";
 import { BlogReader } from "@/lib/models/BlogReader";
 import { getClientIp } from "@/lib/get-client-ip";
 import { getIpGeo } from "@/lib/ip-geo";
+import { isBot } from "@/lib/is-bot";
+import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -27,12 +29,26 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const headersList = await headers();
+    if (isBot(headersList)) {
+      const count = await BlogReader.countDocuments({ blogPostId: post._id });
+      return NextResponse.json({ count });
+    }
+
     const ip = getClientIp(headersList);
     const cfCountry = headersList.get("cf-ipcountry");
 
-    const existing = await BlogReader.findOne({ blogPostId: post._id, ip });
+    let token = await getVisitorToken();
+    let needsCookie = false;
+
+    if (!token) {
+      token = generateVisitorToken();
+      needsCookie = true;
+    }
+
+    const existing = await BlogReader.findOne({ blogPostId: post._id, token });
     if (existing) {
       existing.readAt = new Date();
+      existing.ip = ip;
       if (!existing.country) {
         const geo = await getIpGeo(ip, cfCountry);
         if (geo) Object.assign(existing, geo);
@@ -42,6 +58,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
       const geo = await getIpGeo(ip, cfCountry);
       await BlogReader.create({
         blogPostId: post._id,
+        token,
         ip,
         readAt: new Date(),
         ...(geo && {
@@ -55,7 +72,13 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
     }
 
     const count = await BlogReader.countDocuments({ blogPostId: post._id });
-    return NextResponse.json({ count });
+    const response = NextResponse.json({ count });
+
+    if (needsCookie) {
+      setVisitorTokenCookie(response, token);
+    }
+
+    return response;
   } catch {
     return NextResponse.json({ error: "Failed to record reader" }, { status: 500 });
   }

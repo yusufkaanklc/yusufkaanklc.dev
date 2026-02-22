@@ -2,7 +2,8 @@ import mongoose, { Schema, type Document } from "mongoose";
 
 export interface IBlogReader extends Document {
   blogPostId: mongoose.Types.ObjectId;
-  ip: string;
+  token: string;
+  ip?: string;
   country?: string;
   countryCode?: string;
   city?: string;
@@ -13,7 +14,8 @@ export interface IBlogReader extends Document {
 
 const BlogReaderSchema = new Schema<IBlogReader>({
   blogPostId: { type: Schema.Types.ObjectId, ref: "BlogPost", required: true },
-  ip: { type: String, required: true },
+  token: { type: String, required: true },
+  ip: { type: String },
   country: { type: String },
   countryCode: { type: String },
   city: { type: String },
@@ -22,7 +24,7 @@ const BlogReaderSchema = new Schema<IBlogReader>({
   readAt: { type: Date, default: Date.now },
 });
 
-BlogReaderSchema.index({ blogPostId: 1, ip: 1 }, { unique: true });
+BlogReaderSchema.index({ blogPostId: 1, token: 1 }, { unique: true });
 
 export const BlogReader =
   mongoose.models.BlogReader || mongoose.model<IBlogReader>("BlogReader", BlogReaderSchema);
