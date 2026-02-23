@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Education } from "@/lib/models/Education";
 import { educationSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/education");
 
 export async function GET() {
-  await connectDB();
-  const education = await Education.find().lean();
-  return NextResponse.json(education);
+  try {
+    await connectDB();
+    const education = await Education.find().lean();
+    return NextResponse.json(education);
+  } catch (err) {
+    log.error("GET failed", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -19,7 +27,8 @@ export async function POST(request: Request) {
     }
     const edu = await Education.create(parsed.data);
     return NextResponse.json(edu, { status: 201 });
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

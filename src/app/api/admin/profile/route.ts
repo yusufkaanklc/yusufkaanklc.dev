@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Profile } from "@/lib/models/Profile";
 import { profileSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/profile");
 
 export async function GET() {
-  await connectDB();
-  const profile = await Profile.findOne().lean();
-  return NextResponse.json(profile);
+  try {
+    await connectDB();
+    const profile = await Profile.findOne().lean();
+    return NextResponse.json(profile);
+  } catch (err) {
+    log.error("GET failed", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -19,7 +27,8 @@ export async function PUT(request: Request) {
     }
     const profile = await Profile.findOneAndUpdate({}, parsed.data, { new: true, upsert: true }).lean();
     return NextResponse.json(profile);
-  } catch {
+  } catch (err) {
+    log.error("PUT failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

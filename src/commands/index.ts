@@ -19,7 +19,7 @@ import "./echo";
 import "./sudo";
 import "./neofetch";
 import "./resume";
-import "./visitors";
+
 import "./photo";
 import "./fortune";
 import "./matrix";

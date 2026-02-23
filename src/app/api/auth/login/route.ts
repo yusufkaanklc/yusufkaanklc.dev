@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { verifyPassword, signToken } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/auth/login");
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +46,8 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

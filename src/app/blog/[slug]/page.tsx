@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getPost } from "@/lib/fetchers";
-import { ThemeApplier, ReaderCount, LikeButton, ShareButtons } from "./BlogClientParts";
+import { ThemeApplier, LikeButton, ShareButtons } from "./BlogClientParts";
 
 export async function generateMetadata({
   params,
@@ -138,8 +138,6 @@ export default async function BlogDetailPage({
               <span>{post.date}</span>
               <span className="text-fg-dim/40">|</span>
               <span>{post.readingTime} min read</span>
-              <span className="text-fg-dim/40">|</span>
-              <ReaderCount slug={post.slug} />
             </div>
 
             {post.tags.length > 0 && (

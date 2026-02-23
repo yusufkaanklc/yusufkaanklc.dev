@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Project } from "@/lib/models/Project";
 import { projectSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/projects");
 
 export async function GET() {
-  await connectDB();
-  const projects = await Project.find().lean();
-  return NextResponse.json(projects);
+  try {
+    await connectDB();
+    const projects = await Project.find().lean();
+    return NextResponse.json(projects);
+  } catch (err) {
+    log.error("GET failed", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -19,7 +27,8 @@ export async function POST(request: Request) {
     }
     const project = await Project.create(parsed.data);
     return NextResponse.json(project, { status: 201 });
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

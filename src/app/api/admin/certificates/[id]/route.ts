@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/mongodb";
 import { Certificate } from "@/lib/models/Certificate";
 import { certificateSchema } from "@/lib/validations";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/certificates/[id]");
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,7 +22,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const cert = await Certificate.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
     if (!cert) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(cert);
-  } catch {
+  } catch (err) {
+    log.error("PUT failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -34,7 +38,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const cert = await Certificate.findByIdAndDelete(id);
     if (!cert) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    log.error("DELETE failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

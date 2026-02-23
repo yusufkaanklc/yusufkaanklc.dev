@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/upload");
 
 export async function POST(request: Request) {
   try {
@@ -33,7 +36,8 @@ export async function POST(request: Request) {
 
     const url = `/uploads/${filename}`;
     return NextResponse.json({ url, filename });
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

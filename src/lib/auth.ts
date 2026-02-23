@@ -1,5 +1,8 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
+import { logger } from "@/lib/logger";
+
+const log = logger("auth");
 
 if (!process.env.JWT_SECRET) {
   throw new Error("Please define the JWT_SECRET environment variable inside .env");
@@ -27,7 +30,8 @@ export async function verifyToken(token: string): Promise<Record<string, unknown
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     return payload as Record<string, unknown>;
-  } catch {
+  } catch (err) {
+    log.warn("token verification failed", err);
     return null;
   }
 }

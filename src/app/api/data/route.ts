@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/data");
 import { Profile } from "@/lib/models/Profile";
 import { Project } from "@/lib/models/Project";
 import { BlogPost } from "@/lib/models/BlogPost";
@@ -41,7 +44,8 @@ export async function GET() {
       socials,
       announcements,
     });
-  } catch {
+  } catch (err) {
+    log.error("GET failed", err);
     return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
   }
 }

@@ -15,6 +15,7 @@ const BlogLikeSchema = new Schema<IBlogLike>({
 });
 
 BlogLikeSchema.index({ blogPostId: 1, token: 1 }, { unique: true });
+BlogLikeSchema.index({ blogPostId: 1 });
 
 export const BlogLike =
   mongoose.models.BlogLike || mongoose.model<IBlogLike>("BlogLike", BlogLikeSchema);

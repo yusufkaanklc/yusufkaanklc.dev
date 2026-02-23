@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Announcement } from "@/lib/models/Announcement";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/announcements/latest");
 
 export async function GET() {
   try {
@@ -10,7 +13,8 @@ export async function GET() {
       .select("_id title slug summary priority date")
       .lean();
     return NextResponse.json(announcement ?? null);
-  } catch {
+  } catch (err) {
+    log.error("GET failed", err);
     return NextResponse.json(null);
   }
 }

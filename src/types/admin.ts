@@ -7,47 +7,6 @@ export interface Stats {
   certificates: number;
   socials: number;
   announcements: number;
-  visitors: number;
-  totalReaders: number;
-}
-
-export interface Visitor {
-  _id: string;
-  token: string;
-  ip?: string;
-  country?: string;
-  countryCode?: string;
-  city?: string;
-  regionName?: string;
-  isp?: string;
-  visitedAt: string;
-}
-
-export interface Reader {
-  _id: string;
-  token: string;
-  ip?: string;
-  country?: string;
-  countryCode?: string;
-  city?: string;
-  regionName?: string;
-  isp?: string;
-  readAt: string;
-}
-
-export interface BlogReaderGroup {
-  blogPostId: string;
-  title: string;
-  slug: string;
-  readerCount: number;
-  readers: Reader[];
-}
-
-export interface AnalyticsData {
-  visitors: Visitor[];
-  visitorCount: number;
-  blogReaders: BlogReaderGroup[];
-  totalReaderCount: number;
 }
 
 export interface AnnouncementItem {

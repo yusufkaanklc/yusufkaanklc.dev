@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Certificate } from "@/lib/models/Certificate";
 import { certificateSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/certificates");
 
 export async function GET() {
-  await connectDB();
-  const certificates = await Certificate.find().lean();
-  return NextResponse.json(certificates);
+  try {
+    await connectDB();
+    const certificates = await Certificate.find().lean();
+    return NextResponse.json(certificates);
+  } catch (err) {
+    log.error("GET failed", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -19,7 +27,8 @@ export async function POST(request: Request) {
     }
     const cert = await Certificate.create(parsed.data);
     return NextResponse.json(cert, { status: 201 });
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

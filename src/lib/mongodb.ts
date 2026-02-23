@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
+
+const log = logger("db");
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -22,9 +25,13 @@ export async function connectDB() {
     throw new Error("Please define the MONGODB_URI environment variable inside .env");
   }
 
-  if (cached.conn) return cached.conn;
+  if (cached.conn) {
+    log.debug("reusing existing connection");
+    return cached.conn;
+  }
 
   if (!cached.promise) {
+    log.info("creating new MongoDB connection");
     cached.promise = mongoose.connect(MONGODB_URI);
   }
 

@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/mongodb";
 import { SkillCategory } from "@/lib/models/SkillCategory";
 import { skillCategorySchema } from "@/lib/validations";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/skills/[id]");
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,7 +22,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const skill = await SkillCategory.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
     if (!skill) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(skill);
-  } catch {
+  } catch (err) {
+    log.error("PUT failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -34,7 +38,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const skill = await SkillCategory.findByIdAndDelete(id);
     if (!skill) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    log.error("DELETE failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -5,6 +5,9 @@ import { BlogPost } from "@/lib/models/BlogPost";
 import { BlogLike } from "@/lib/models/BlogLike";
 import { getClientIp } from "@/lib/get-client-ip";
 import { getVisitorToken, generateVisitorToken, setVisitorTokenCookie } from "@/lib/visitor-token";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/blog/likes");
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -21,7 +24,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     ]);
 
     return NextResponse.json({ count, liked: !!existing });
-  } catch {
+  } catch (err) {
+    log.error("GET failed", err);
     return NextResponse.json({ error: "Failed to fetch likes" }, { status: 500 });
   }
 }
@@ -60,7 +64,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ sl
     }
 
     return response;
-  } catch {
+  } catch (err) {
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Failed to toggle like" }, { status: 500 });
   }
 }

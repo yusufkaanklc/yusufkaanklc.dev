@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { blogPostSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/blog");
 
 function calculateReadingTime(content?: string): number {
   if (!content) return 1;
@@ -10,9 +13,14 @@ function calculateReadingTime(content?: string): number {
 }
 
 export async function GET() {
-  await connectDB();
-  const posts = await BlogPost.find().sort({ createdAt: -1 }).lean();
-  return NextResponse.json(posts);
+  try {
+    await connectDB();
+    const posts = await BlogPost.find().sort({ createdAt: -1 }).lean();
+    return NextResponse.json(posts);
+  } catch (err) {
+    log.error("GET failed", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -30,6 +38,7 @@ export async function POST(request: Request) {
     if (err instanceof Error && "code" in err && (err as Record<string, unknown>).code === 11000) {
       return NextResponse.json({ error: { slug: ["Slug already exists"] } }, { status: 400 });
     }
+    log.error("POST failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

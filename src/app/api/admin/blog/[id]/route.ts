@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { blogPostSchema } from "@/lib/validations";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/blog/[id]");
 
 function calculateReadingTime(content?: string): number {
   if (!content) return 1;
@@ -33,6 +36,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (err instanceof Error && "code" in err && (err as Record<string, unknown>).code === 11000) {
       return NextResponse.json({ error: { slug: ["Slug already exists"] } }, { status: 400 });
     }
+    log.error("PUT failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -47,7 +51,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const post = await BlogPost.findByIdAndDelete(id);
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    log.error("DELETE failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

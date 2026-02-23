@@ -9,23 +9,6 @@ export function ThemeApplier() {
   return null;
 }
 
-export function ReaderCount({ slug }: { slug: string }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    fetch(`/api/blog/${slug}/readers`, { method: "POST" })
-      .then((r) => r.json())
-      .then((data) => setCount(data.count ?? 0))
-      .catch(() => {});
-  }, [slug]);
-
-  return (
-    <span>
-      {count} reader{count !== 1 ? "s" : ""}
-    </span>
-  );
-}
-
 export function LikeButton({ slug }: { slug: string }) {
   const [count, setCount] = useState(0);
   const [liked, setLiked] = useState(false);

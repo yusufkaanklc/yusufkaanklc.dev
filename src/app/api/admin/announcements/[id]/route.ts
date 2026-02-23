@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/mongodb";
 import { Announcement } from "@/lib/models/Announcement";
 import { announcementSchema } from "@/lib/validations";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
+
+const log = logger("api/admin/announcements/[id]");
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -23,6 +26,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (err instanceof Error && "code" in err && (err as Record<string, unknown>).code === 11000) {
       return NextResponse.json({ error: { slug: ["Slug already exists"] } }, { status: 400 });
     }
+    log.error("PUT failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -37,7 +41,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const announcement = await Announcement.findByIdAndDelete(id);
     if (!announcement) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    log.error("DELETE failed", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -14,7 +14,6 @@ const navItems = [
   { label: "Education", href: "/admin/education", icon: "^" },
   { label: "Contact", href: "/admin/contact", icon: "&" },
   { label: "Socials", href: "/admin/socials", icon: "%" },
-  { label: "Analytics", href: "/admin/analytics", icon: "=" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

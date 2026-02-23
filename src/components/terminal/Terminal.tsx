@@ -64,25 +64,6 @@ export function Terminal() {
         })),
       ]);
 
-      fetch("/api/visitors", { method: "POST" })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.count != null) {
-            addSystemLines([
-              {
-                id: "visitor-count",
-                type: "system" as const,
-                content: `  Total visitors: ${data.count}`,
-              },
-              {
-                id: "visitor-spacer",
-                type: "system" as const,
-                content: "",
-              },
-            ]);
-          }
-        })
-        .catch(() => {});
     }
   }, [addSystemLines, data]);
 
