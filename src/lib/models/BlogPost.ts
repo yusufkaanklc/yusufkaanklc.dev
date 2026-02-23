@@ -1,17 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { BlogPost as BlogPostBase } from "@/types/models";
 
-export interface IBlogPost extends Document {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  coverImage?: string;
-  readingTime: number;
-  published: boolean;
-  url?: string;
-}
+export interface IBlogPost extends BlogPostBase, Document {}
 
 const BlogPostSchema = new Schema<IBlogPost>(
   {

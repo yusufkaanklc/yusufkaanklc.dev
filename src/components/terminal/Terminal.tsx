@@ -12,11 +12,10 @@ import { AnnouncementBanner } from "./AnnouncementBanner";
 import { TerminalOutput } from "./TerminalOutput";
 import { TerminalInput } from "./TerminalInput";
 import { useKonamiCode } from "@/hooks/useKonamiCode";
+import { MOBILE_COMMANDS } from "@/utils/constants";
 
 // Register all commands via side-effect imports
 import "@/commands";
-
-const MOBILE_COMMANDS = ["help", "about", "projects", "skills", "experience", "resume", "contact", "clear"];
 
 export function Terminal() {
   const { theme, setTheme } = useTheme();

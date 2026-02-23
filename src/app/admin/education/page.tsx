@@ -7,8 +7,8 @@ import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import type { EduItem, CertItem } from "@/types/admin";
 
-const emptyEdu: EduItem = { degree: "", school: "", period: "", description: "" };
-const emptyCert: CertItem = { name: "", issuer: "" };
+const emptyEdu: EduItem = { _id: "", degree: "", school: "", period: "", description: "" };
+const emptyCert: CertItem = { _id: "", name: "", issuer: "" };
 
 export default function EducationPage() {
   const [eduItems, setEduItems] = useState<EduItem[]>([]);

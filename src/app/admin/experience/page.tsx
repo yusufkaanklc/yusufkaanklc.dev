@@ -7,7 +7,7 @@ import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import type { ExperienceItem } from "@/types/admin";
 
-const emptyExp: ExperienceItem = { role: "", company: "", location: "", period: "", description: "" };
+const emptyExp: ExperienceItem = { _id: "", role: "", company: "", location: "", period: "", description: "" };
 
 export default function ExperiencePage() {
   const [items, setItems] = useState<ExperienceItem[]>([]);

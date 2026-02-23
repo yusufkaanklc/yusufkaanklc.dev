@@ -1,4 +1,4 @@
-import { type Social } from "@/data/socials";
+import type { Social } from "@/types/models";
 
 export function SocialLink({ social }: { social: Social }) {
   return (

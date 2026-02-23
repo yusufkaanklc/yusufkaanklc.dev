@@ -1,9 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Certificate as CertificateBase } from "@/types/models";
 
-export interface ICertificate extends Document {
-  name: string;
-  issuer: string;
-}
+export interface ICertificate extends CertificateBase, Document {}
 
 const CertificateSchema = new Schema<ICertificate>(
   {

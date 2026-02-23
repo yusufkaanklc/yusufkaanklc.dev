@@ -8,7 +8,7 @@ import { TagInput } from "@/components/admin/TagInput";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import type { SkillItem } from "@/types/admin";
 
-const emptySkill: SkillItem = { name: "", skills: [] };
+const emptySkill: SkillItem = { _id: "", name: "", skills: [] };
 
 export default function SkillsPage() {
   const [items, setItems] = useState<SkillItem[]>([]);

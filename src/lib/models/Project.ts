@@ -1,12 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Project as ProjectBase } from "@/types/models";
 
-export interface IProject extends Document {
-  name: string;
-  description: string;
-  tech: string[];
-  url?: string;
-  github?: string;
-}
+export interface IProject extends ProjectBase, Document {}
 
 const ProjectSchema = new Schema<IProject>(
   {

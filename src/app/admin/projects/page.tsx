@@ -8,7 +8,7 @@ import { TagInput } from "@/components/admin/TagInput";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import type { ProjectItem } from "@/types/admin";
 
-const emptyProject: ProjectItem = { name: "", description: "", tech: [], url: "", github: "" };
+const emptyProject: ProjectItem = { _id: "", name: "", description: "", tech: [], url: "", github: "" };
 
 export default function ProjectsPage() {
   const [items, setItems] = useState<ProjectItem[]>([]);

@@ -1,4 +1,4 @@
-import { type SkillCategory } from "@/data/skills";
+import type { SkillCategory } from "@/types/models";
 
 export function SkillBar({ category }: { category: SkillCategory }) {
   return (

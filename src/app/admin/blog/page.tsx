@@ -9,6 +9,7 @@ import { generateSlug } from "@/utils/slug";
 import type { BlogItem } from "@/types/admin";
 
 const emptyPost: BlogItem = {
+  _id: "",
   title: "",
   slug: "",
   date: "",
@@ -16,6 +17,7 @@ const emptyPost: BlogItem = {
   content: "",
   tags: [],
   coverImage: "",
+  readingTime: 0,
   published: false,
   url: "",
 };

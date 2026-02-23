@@ -10,6 +10,7 @@ import { priorityColors } from "@/utils/priority";
 import type { AnnouncementItem } from "@/types/admin";
 
 const emptyAnnouncement: AnnouncementItem = {
+  _id: "",
   title: "",
   slug: "",
   date: "",

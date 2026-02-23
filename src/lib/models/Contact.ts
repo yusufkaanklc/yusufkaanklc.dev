@@ -1,11 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Contact as ContactBase } from "@/types/models";
 
-export interface IContact extends Document {
-  email: string;
-  phone: string;
-  location: string;
-  availability: string;
-}
+export interface IContact extends ContactBase, Document {}
 
 const ContactSchema = new Schema<IContact>(
   {

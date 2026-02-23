@@ -1,4 +1,17 @@
 import { type ReactNode } from "react";
+import type {
+  WithOptionalId,
+  BlogPost,
+  Announcement,
+  Project,
+  Experience,
+  Education,
+  Certificate,
+  SkillCategory,
+  Social,
+  Contact,
+  Profile,
+} from "./models";
 
 export interface CommandDefinition {
   name: string;
@@ -19,26 +32,16 @@ export interface CommandContext {
 }
 
 export interface SiteData {
-  profile: {
-    name: string;
-    username: string;
-    title: string;
-    bio: string;
-    location: string;
-    email: string;
-    phone: string;
-    website: string;
-    resumeUrl: string;
-  };
-  projects: { _id?: string; name: string; description: string; tech: string[]; url?: string; github?: string }[];
-  blogPosts: { _id?: string; title: string; slug: string; date: string; summary: string; content?: string; tags: string[]; coverImage?: string; readingTime: number; published: boolean; url?: string }[];
-  skillCategories: { _id?: string; name: string; skills: string[] }[];
-  experiences: { _id?: string; role: string; company: string; location: string; period: string; description: string }[];
-  educationList: { _id?: string; degree: string; school: string; period: string; description?: string }[];
-  certificates: { _id?: string; name: string; issuer: string }[];
-  contact: { email: string; phone: string; location: string; availability: string };
-  socials: { _id?: string; name: string; url: string; icon: string }[];
-  announcements: { _id?: string; title: string; slug: string; date: string; summary: string; content?: string; priority: "normal" | "important" | "critical"; published: boolean }[];
+  profile: Profile;
+  projects: WithOptionalId<Project>[];
+  blogPosts: WithOptionalId<BlogPost>[];
+  skillCategories: WithOptionalId<SkillCategory>[];
+  experiences: WithOptionalId<Experience>[];
+  educationList: WithOptionalId<Education>[];
+  certificates: WithOptionalId<Certificate>[];
+  contact: Contact;
+  socials: WithOptionalId<Social>[];
+  announcements: WithOptionalId<Announcement>[];
 }
 
 export interface CommandResult {

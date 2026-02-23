@@ -1,9 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { SkillCategory as SkillCategoryBase } from "@/types/models";
 
-export interface ISkillCategory extends Document {
-  name: string;
-  skills: string[];
-}
+export interface ISkillCategory extends SkillCategoryBase, Document {}
 
 const SkillCategorySchema = new Schema<ISkillCategory>(
   {

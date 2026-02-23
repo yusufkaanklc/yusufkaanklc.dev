@@ -1,11 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Education as EducationBase } from "@/types/models";
 
-export interface IEducation extends Document {
-  degree: string;
-  school: string;
-  period: string;
-  description?: string;
-}
+export interface IEducation extends EducationBase, Document {}
 
 const EducationSchema = new Schema<IEducation>(
   {

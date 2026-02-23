@@ -1,3 +1,17 @@
+import type {
+  WithId,
+  BlogPost,
+  Announcement,
+  Project,
+  Experience,
+  Education,
+  Certificate,
+  SkillCategory,
+  Social,
+  Profile,
+  Contact,
+} from "./models";
+
 export interface Stats {
   projects: number;
   blogPosts: number;
@@ -9,91 +23,13 @@ export interface Stats {
   announcements: number;
 }
 
-export interface AnnouncementItem {
-  _id?: string;
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  priority: "normal" | "important" | "critical";
-  published: boolean;
-}
-
-export interface BlogItem {
-  _id?: string;
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  coverImage?: string;
-  readingTime?: number;
-  published: boolean;
-  url?: string;
-}
-
-export interface ProjectItem {
-  _id?: string;
-  name: string;
-  description: string;
-  tech: string[];
-  url?: string;
-  github?: string;
-}
-
-export interface SkillItem {
-  _id?: string;
-  name: string;
-  skills: string[];
-}
-
-export interface ExperienceItem {
-  _id?: string;
-  role: string;
-  company: string;
-  location: string;
-  period: string;
-  description: string;
-}
-
-export interface EduItem {
-  _id?: string;
-  degree: string;
-  school: string;
-  period: string;
-  description?: string;
-}
-
-export interface CertItem {
-  _id?: string;
-  name: string;
-  issuer: string;
-}
-
-export interface ProfileData {
-  name: string;
-  username: string;
-  title: string;
-  bio: string;
-  location: string;
-  email: string;
-  phone: string;
-  website: string;
-  resumeUrl: string;
-}
-
-export interface ContactData {
-  email: string;
-  phone: string;
-  location: string;
-  availability: string;
-}
-
-export interface SocialItem {
-  _id?: string;
-  name: string;
-  url: string;
-  icon: string;
-}
+export type BlogItem = WithId<BlogPost>;
+export type AnnouncementItem = WithId<Announcement>;
+export type ProjectItem = WithId<Project>;
+export type SkillItem = WithId<SkillCategory>;
+export type ExperienceItem = WithId<Experience>;
+export type EduItem = WithId<Education>;
+export type CertItem = WithId<Certificate>;
+export type SocialItem = WithId<Social>;
+export type ProfileData = Profile;
+export type ContactData = Contact;

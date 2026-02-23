@@ -1,10 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Social as SocialBase } from "@/types/models";
 
-export interface ISocial extends Document {
-  name: string;
-  url: string;
-  icon: string;
-}
+export interface ISocial extends SocialBase, Document {}
 
 const SocialSchema = new Schema<ISocial>(
   {

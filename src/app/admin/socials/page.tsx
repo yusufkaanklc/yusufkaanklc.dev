@@ -7,7 +7,7 @@ import { Input } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import type { SocialItem } from "@/types/admin";
 
-const emptySocial: SocialItem = { name: "", url: "", icon: "" };
+const emptySocial: SocialItem = { _id: "", name: "", url: "", icon: "" };
 
 export default function SocialsPage() {
   const [items, setItems] = useState<SocialItem[]>([]);

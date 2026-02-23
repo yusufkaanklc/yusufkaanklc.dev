@@ -1,8 +1,10 @@
 import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { Announcement } from "@/lib/models/Announcement";
-import type { BlogPostData } from "@/types/blog";
-import type { AnnouncementData } from "@/types/blog";
+import type { BlogPost as BlogPostType, Announcement as AnnouncementType } from "@/types/models";
+
+type BlogPostData = Omit<BlogPostType, "published">;
+type AnnouncementData = Omit<AnnouncementType, "published">;
 
 export async function getPost(slug: string): Promise<BlogPostData | null> {
   try {

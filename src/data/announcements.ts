@@ -1,12 +1,4 @@
-export interface Announcement {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  priority: "normal" | "important" | "critical";
-  published: boolean;
-}
+import type { Announcement } from "@/types/models";
 
 export const announcements: Announcement[] = [
   {

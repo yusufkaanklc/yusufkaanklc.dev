@@ -1,8 +1,4 @@
-export interface Social {
-  name: string;
-  url: string;
-  icon: string;
-}
+import type { Social } from "@/types/models";
 
 export const socials: Social[] = [
   { name: "GitHub", url: "https://github.com/yusufkaanklc", icon: "" },

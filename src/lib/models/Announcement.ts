@@ -1,14 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Announcement as AnnouncementBase } from "@/types/models";
 
-export interface IAnnouncement extends Document {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  priority: "normal" | "important" | "critical";
-  published: boolean;
-}
+export interface IAnnouncement extends AnnouncementBase, Document {}
 
 const AnnouncementSchema = new Schema<IAnnouncement>(
   {

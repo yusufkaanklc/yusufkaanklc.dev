@@ -1,4 +1,4 @@
-import { type Project } from "@/data/projects";
+import type { Project } from "@/types/models";
 
 export function ProjectCard({ project }: { project: Project }) {
   return (

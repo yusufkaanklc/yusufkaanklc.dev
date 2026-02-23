@@ -1,15 +1,4 @@
-export interface BlogPost {
-  title: string;
-  slug: string;
-  date: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  coverImage?: string;
-  readingTime: number;
-  published: boolean;
-  url?: string;
-}
+import type { BlogPost } from "@/types/models";
 
 export const blogPosts: BlogPost[] = [
   {

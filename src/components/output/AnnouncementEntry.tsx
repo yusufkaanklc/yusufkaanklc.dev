@@ -1,4 +1,4 @@
-import { type Announcement } from "@/data/announcements";
+import type { Announcement } from "@/types/models";
 import { priorityTextColors } from "@/utils/priority";
 
 export function AnnouncementEntry({ announcement }: { announcement: Announcement }) {

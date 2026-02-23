@@ -1,9 +1,4 @@
-export interface Education {
-  degree: string;
-  school: string;
-  period: string;
-  description?: string;
-}
+import type { Education, Certificate } from "@/types/models";
 
 export const educationList: Education[] = [
   {
@@ -13,11 +8,6 @@ export const educationList: Education[] = [
     description: "Associate degree in Computer Programming.",
   },
 ];
-
-export interface Certificate {
-  name: string;
-  issuer: string;
-}
 
 export const certificates: Certificate[] = [
   { name: "Intermediate Frontend Development", issuer: "Patika.dev" },

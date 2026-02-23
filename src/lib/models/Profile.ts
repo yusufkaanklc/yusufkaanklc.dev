@@ -1,16 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Profile as ProfileBase } from "@/types/models";
 
-export interface IProfile extends Document {
-  name: string;
-  username: string;
-  title: string;
-  bio: string;
-  location: string;
-  email: string;
-  phone: string;
-  website: string;
-  resumeUrl: string;
-}
+export interface IProfile extends ProfileBase, Document {}
 
 const ProfileSchema = new Schema<IProfile>(
   {

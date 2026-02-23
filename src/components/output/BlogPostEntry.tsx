@@ -1,4 +1,4 @@
-import { type BlogPost } from "@/data/blog";
+import type { BlogPost } from "@/types/models";
 
 export function BlogPostEntry({ post }: { post: BlogPost }) {
   const href = `/blog/${post.slug}`;

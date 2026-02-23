@@ -1,12 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
+import type { Experience as ExperienceBase } from "@/types/models";
 
-export interface IExperience extends Document {
-  role: string;
-  company: string;
-  location: string;
-  period: string;
-  description: string;
-}
+export interface IExperience extends ExperienceBase, Document {}
 
 const ExperienceSchema = new Schema<IExperience>(
   {
