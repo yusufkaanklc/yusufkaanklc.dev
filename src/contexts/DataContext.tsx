@@ -13,6 +13,7 @@ import { educationList as staticEducationList, certificates as staticCertificate
 import { contact as staticContact } from "@/data/contact";
 import { socials as staticSocials } from "@/data/socials";
 import { announcements as staticAnnouncements } from "@/data/announcements";
+import { news as staticNews } from "@/data/news";
 
 interface DataContextValue {
   data: SiteData | null;
@@ -30,6 +31,7 @@ const staticData: SiteData = {
   contact: staticContact,
   socials: staticSocials,
   announcements: staticAnnouncements,
+  newsArticles: staticNews,
 };
 
 const DataContext = createContext<DataContextValue>({ data: staticData, loading: false });

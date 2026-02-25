@@ -13,12 +13,13 @@ import { Certificate } from "@/lib/models/Certificate";
 import { Contact } from "@/lib/models/Contact";
 import { Social } from "@/lib/models/Social";
 import { Announcement } from "@/lib/models/Announcement";
+import { NewsArticle } from "@/lib/models/News";
 
 export async function GET() {
   try {
     await connectDB();
 
-    const [profile, projects, blogPosts, skillCategories, experiences, educationList, certificates, contact, socials, announcements] =
+    const [profile, projects, blogPosts, skillCategories, experiences, educationList, certificates, contact, socials, announcements, newsArticles] =
       await Promise.all([
         Profile.findOne().lean(),
         Project.find().lean(),
@@ -30,6 +31,7 @@ export async function GET() {
         Contact.findOne().lean(),
         Social.find().lean(),
         Announcement.find({ published: true }).sort({ createdAt: -1 }).lean(),
+        NewsArticle.find({ published: true }).sort({ createdAt: -1 }).lean(),
       ]);
 
     return NextResponse.json({
@@ -43,6 +45,7 @@ export async function GET() {
       contact,
       socials,
       announcements,
+      newsArticles,
     });
   } catch (err) {
     log.error("GET failed", err);

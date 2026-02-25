@@ -3,6 +3,7 @@ import type {
   WithOptionalId,
   BlogPost,
   Announcement,
+  NewsArticle,
   Project,
   Experience,
   Education,
@@ -42,6 +43,7 @@ export interface SiteData {
   contact: Contact;
   socials: WithOptionalId<Social>[];
   announcements: WithOptionalId<Announcement>[];
+  newsArticles: WithOptionalId<NewsArticle>[];
 }
 
 export interface CommandResult {
