@@ -25,6 +25,18 @@ export interface Announcement {
   published: boolean;
 }
 
+export interface NewsArticle {
+  title: string;
+  slug: string;
+  date: string;
+  summary: string;
+  content?: string;
+  tags: string[];
+  coverImage?: string;
+  published: boolean;
+  url?: string;
+}
+
 export interface Project {
   name: string;
   description: string;

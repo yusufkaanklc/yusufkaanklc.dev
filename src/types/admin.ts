@@ -2,6 +2,7 @@ import type {
   WithId,
   BlogPost,
   Announcement,
+  NewsArticle,
   Project,
   Experience,
   Education,
@@ -21,10 +22,12 @@ export interface Stats {
   certificates: number;
   socials: number;
   announcements: number;
+  news: number;
 }
 
 export type BlogItem = WithId<BlogPost>;
 export type AnnouncementItem = WithId<Announcement>;
+export type NewsItem = WithId<NewsArticle>;
 export type ProjectItem = WithId<Project>;
 export type SkillItem = WithId<SkillCategory>;
 export type ExperienceItem = WithId<Experience>;

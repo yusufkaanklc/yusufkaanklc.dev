@@ -9,6 +9,7 @@ import { educationList, certificates } from "../data/education";
 import { contact } from "../data/contact";
 import { socials } from "../data/socials";
 import { announcements } from "../data/announcements";
+import { news } from "../data/news";
 
 import { Profile } from "./models/Profile";
 import { Project } from "./models/Project";
@@ -21,6 +22,7 @@ import { Certificate } from "./models/Certificate";
 import { Contact } from "./models/Contact";
 import { Social } from "./models/Social";
 import { Announcement } from "./models/Announcement";
+import { NewsArticle } from "./models/News";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
@@ -46,6 +48,7 @@ async function seed() {
     Contact.deleteMany({}),
     Social.deleteMany({}),
     Announcement.deleteMany({}),
+    NewsArticle.deleteMany({}),
   ]);
   console.log("Cleared existing data.");
 
@@ -88,6 +91,10 @@ async function seed() {
   // Seed announcements
   await Announcement.insertMany(announcements);
   console.log(`Seeded ${announcements.length} announcements.`);
+
+  // Seed news
+  await NewsArticle.insertMany(news);
+  console.log(`Seeded ${news.length} news articles.`);
 
   console.log("\nSeed completed successfully!");
   await mongoose.disconnect();

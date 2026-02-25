@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getAnnouncement } from "@/lib/fetchers";
+import { generateArticleSchema, generateBreadcrumbs } from "@/lib/schema";
+import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
 import { priorityTextColors } from "@/utils/priority";
-import { ThemeApplier } from "@/app/blog/[slug]/BlogClientParts";
 
 export async function generateMetadata({
   params,
@@ -56,92 +56,43 @@ export default async function AnnouncementDetailPage({
     notFound();
   }
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: announcement.title,
-    description: announcement.summary,
-    datePublished: announcement.date,
-    author: {
-      "@type": "Person",
-      name: "Yusuf Kaan Kilic",
-      url: "https://yusufkaanklc.dev",
-    },
-    url: `https://yusufkaanklc.dev/announcements/${announcement.slug}`,
-  };
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://yusufkaanklc.dev",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Announcements",
-        item: "https://yusufkaanklc.dev/announcements",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: announcement.title,
-        item: `https://yusufkaanklc.dev/announcements/${announcement.slug}`,
-      },
-    ],
-  };
+  const schemas = [
+    generateArticleSchema({
+      type: "BlogPosting",
+      title: announcement.title,
+      summary: announcement.summary,
+      date: announcement.date,
+      path: `/announcements/${announcement.slug}`,
+    }),
+    generateBreadcrumbs([
+      { name: "Announcements", path: "/announcements" },
+      { name: announcement.title, path: `/announcements/${announcement.slug}` },
+    ]),
+  ];
 
   return (
-    <>
-      <ThemeApplier />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <div className="min-h-screen bg-bg-secondary text-fg font-mono">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              href="/announcements"
-              className="text-accent hover:underline text-sm mb-6 inline-block"
-            >
-              &larr; Back to announcements
-            </Link>
+    <ContentPageLayout backHref="/announcements" backLabel="Back to announcements" schemas={schemas}>
+      <h1 className="text-2xl font-bold text-accent mb-3">
+        {announcement.title}
+      </h1>
 
-            <h1 className="text-2xl font-bold text-accent mb-3">
-              {announcement.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-4">
-              <span>{announcement.date}</span>
-              <span className="text-fg-dim/40">|</span>
-              <span className={`font-medium capitalize ${priorityTextColors[announcement.priority]}`}>
-                {announcement.priority}
-              </span>
-            </div>
-
-            <p className="text-fg-muted text-sm border-l-2 border-accent/30 pl-3">
-              {announcement.summary}
-            </p>
-          </div>
-
-          {/* Content */}
-          {announcement.content && (
-            <article className="prose prose-invert max-w-none blog-content">
-              <ReactMarkdown>{announcement.content}</ReactMarkdown>
-            </article>
-          )}
-        </div>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-4">
+        <span>{announcement.date}</span>
+        <span className="text-fg-dim/40">|</span>
+        <span className={`font-medium capitalize ${priorityTextColors[announcement.priority]}`}>
+          {announcement.priority}
+        </span>
       </div>
-    </>
+
+      <p className="text-fg-muted text-sm border-l-2 border-accent/30 pl-3 mb-8">
+        {announcement.summary}
+      </p>
+
+      {announcement.content && (
+        <article className="prose prose-invert max-w-none blog-content">
+          <ReactMarkdown>{announcement.content}</ReactMarkdown>
+        </article>
+      )}
+    </ContentPageLayout>
   );
 }

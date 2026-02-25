@@ -1,6 +1,7 @@
 import { registerCommand } from "@/core/commandRegistry";
 import { socials as staticSocials } from "@/data/socials";
 import { SocialLink } from "@/components/output/SocialLink";
+import { commandListOutput } from "@/utils/commandHelpers";
 
 registerCommand({
   name: "socials",
@@ -8,18 +9,9 @@ registerCommand({
   handler: (_args, context) => {
     const socials = context.data?.socials ?? staticSocials;
     return {
-      output: [
-        {
-          id: `socials-header-${Date.now()}`,
-          type: "component",
-          component: <p className="text-accent font-bold mb-2">Social Links:</p>,
-        },
-        ...socials.map((social, i) => ({
-          id: `social-${i}-${Date.now()}`,
-          type: "component" as const,
-          component: <SocialLink social={social} />,
-        })),
-      ],
+      output: commandListOutput("social", "Social Links:", socials, (social) => (
+        <SocialLink social={social} />
+      )),
     };
   },
 });

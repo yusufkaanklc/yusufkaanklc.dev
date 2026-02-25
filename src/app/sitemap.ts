@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { connectDB } from "@/lib/mongodb";
 import { BlogPost } from "@/lib/models/BlogPost";
 import { Announcement } from "@/lib/models/Announcement";
+import { NewsArticle } from "@/lib/models/News";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://yusufkaanklc.dev";
@@ -18,6 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug updatedAt")
       .lean();
 
+    const newsItems = await NewsArticle.find({ published: true })
+      .select("slug updatedAt")
+      .lean();
+
     const latestPost = posts.length > 0
       ? new Date(Math.max(...posts.map((p) => new Date(p.updatedAt ?? 0).getTime())))
       : fallback;
@@ -26,7 +31,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ? new Date(Math.max(...announcementItems.map((a) => new Date(a.updatedAt ?? 0).getTime())))
       : fallback;
 
-    const latestOverall = new Date(Math.max(latestPost.getTime(), latestAnnouncement.getTime()));
+    const latestNews = newsItems.length > 0
+      ? new Date(Math.max(...newsItems.map((n) => new Date(n.updatedAt ?? 0).getTime())))
+      : fallback;
+
+    const latestOverall = new Date(Math.max(latestPost.getTime(), latestAnnouncement.getTime(), latestNews.getTime()));
 
     const staticPages: MetadataRoute.Sitemap = [
       {
@@ -47,6 +56,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly",
         priority: 0.6,
       },
+      {
+        url: `${baseUrl}/news`,
+        lastModified: latestNews,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      },
     ];
 
     const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
@@ -63,7 +78,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
-    return [...staticPages, ...blogPages, ...announcementPages];
+    const newsPages: MetadataRoute.Sitemap = newsItems.map((n) => ({
+      url: `${baseUrl}/news/${n.slug}`,
+      lastModified: n.updatedAt ?? fallback,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
+
+    return [...staticPages, ...blogPages, ...announcementPages, ...newsPages];
   } catch {
     return [
       {

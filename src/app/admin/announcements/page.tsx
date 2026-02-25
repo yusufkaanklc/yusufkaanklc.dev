@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
+import { useAdminCRUD } from "@/hooks/useAdminCRUD";
 import { generateSlug } from "@/utils/slug";
 import { priorityColors } from "@/utils/priority";
 import type { AnnouncementItem } from "@/types/admin";
 
-const emptyAnnouncement: AnnouncementItem = {
+const empty: AnnouncementItem = {
   _id: "",
   title: "",
   slug: "",
@@ -21,49 +21,10 @@ const emptyAnnouncement: AnnouncementItem = {
 };
 
 export default function AnnouncementsPage() {
-  const [items, setItems] = useState<AnnouncementItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<AnnouncementItem | null>(null);
-  const [deleting, setDeleting] = useState<AnnouncementItem | null>(null);
-  const [showForm, setShowForm] = useState(false);
-
-  const load = () =>
-    fetch("/api/admin/announcements")
-      .then((r) => r.json())
-      .then(setItems)
-      .finally(() => setLoading(false));
-  useEffect(() => { load(); }, []);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    const method = editing._id ? "PUT" : "POST";
-    const url = editing._id ? `/api/admin/announcements/${editing._id}` : "/api/admin/announcements";
-    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
-    setEditing(null);
-    setShowForm(false);
-    load();
-  };
-
-  const handleDelete = async () => {
-    if (!deleting?._id) return;
-    await fetch(`/api/admin/announcements/${deleting._id}`, { method: "DELETE" });
-    setDeleting(null);
-    load();
-  };
-
-  const update = (field: keyof AnnouncementItem) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setEditing((prev) => prev ? { ...prev, [field]: e.target.value } : prev);
-
-  const startEdit = (item: AnnouncementItem) => {
-    setEditing({ ...item });
-    setShowForm(true);
-  };
-
-  const startNew = () => {
-    setEditing({ ...emptyAnnouncement });
-    setShowForm(true);
-  };
+  const {
+    items, loading, editing, setEditing, deleting, setDeleting,
+    showForm, handleSave, handleDelete, update, startNew, cancelEdit, startEdit,
+  } = useAdminCRUD<AnnouncementItem>({ resource: "announcements", empty });
 
   return (
     <div className="space-y-6">
@@ -90,17 +51,11 @@ export default function AnnouncementsPage() {
               ...(prev._id ? {} : { slug: generateSlug(title) }),
             } : prev);
           }} required />
-          <Input
-            label="Slug"
-            value={editing.slug}
-            onChange={update("slug")}
-            required
-          />
+          <Input label="Slug" value={editing.slug} onChange={update("slug")} required />
           <Input label="Date" type="date" value={editing.date} onChange={update("date")} required />
           <TextArea label="Summary" value={editing.summary} onChange={update("summary")} required />
           <TextArea label="Content (Markdown)" value={editing.content ?? ""} onChange={update("content")} />
 
-          {/* Priority selector */}
           <div>
             <label className="block text-xs text-fg-dim mb-2 font-mono uppercase tracking-wider">Priority</label>
             <div className="flex gap-2">
@@ -141,7 +96,7 @@ export default function AnnouncementsPage() {
             <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
               {editing._id ? "Update" : "Create"}
             </button>
-            <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
+            <button type="button" onClick={cancelEdit} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
               Cancel
             </button>
           </div>

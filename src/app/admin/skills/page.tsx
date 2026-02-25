@@ -1,46 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input } from "@/components/admin/FormField";
 import { TagInput } from "@/components/admin/TagInput";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
+import { useAdminCRUD } from "@/hooks/useAdminCRUD";
 import type { SkillItem } from "@/types/admin";
 
-const emptySkill: SkillItem = { _id: "", name: "", skills: [] };
+const empty: SkillItem = { _id: "", name: "", skills: [] };
 
 export default function SkillsPage() {
-  const [items, setItems] = useState<SkillItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<SkillItem | null>(null);
-  const [deleting, setDeleting] = useState<SkillItem | null>(null);
-  const [showForm, setShowForm] = useState(false);
-
-  const load = () =>
-    fetch("/api/admin/skills")
-      .then((r) => r.json())
-      .then(setItems)
-      .finally(() => setLoading(false));
-  useEffect(() => { load(); }, []);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    const method = editing._id ? "PUT" : "POST";
-    const url = editing._id ? `/api/admin/skills/${editing._id}` : "/api/admin/skills";
-    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
-    setEditing(null);
-    setShowForm(false);
-    load();
-  };
-
-  const handleDelete = async () => {
-    if (!deleting?._id) return;
-    await fetch(`/api/admin/skills/${deleting._id}`, { method: "DELETE" });
-    setDeleting(null);
-    load();
-  };
+  const {
+    items, loading, editing, setEditing, deleting, setDeleting,
+    showForm, handleSave, handleDelete, startEdit, startNew, cancelEdit,
+  } = useAdminCRUD<SkillItem>({ resource: "skills", empty });
 
   return (
     <div className="space-y-6">
@@ -50,7 +24,7 @@ export default function SkillsPage() {
           <span className="text-fg-dim/40 text-xs font-mono">~/skills</span>
         </div>
         <button
-          onClick={() => { setEditing({ ...emptySkill }); setShowForm(true); }}
+          onClick={startNew}
           className="px-3 py-2 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium"
         >
           + New
@@ -65,7 +39,7 @@ export default function SkillsPage() {
             <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
               {editing._id ? "Update" : "Create"}
             </button>
-            <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
+            <button type="button" onClick={cancelEdit} className="px-4 py-2.5 text-sm rounded-lg bg-fg-dim/8 text-fg-muted hover:bg-fg-dim/15 transition-colors border border-fg-dim/10">
               Cancel
             </button>
           </div>
@@ -86,7 +60,7 @@ export default function SkillsPage() {
             )},
           ]}
           data={items}
-          onEdit={(item) => { setEditing({ ...item }); setShowForm(true); }}
+          onEdit={startEdit}
           onDelete={setDeleting}
         />
       )}

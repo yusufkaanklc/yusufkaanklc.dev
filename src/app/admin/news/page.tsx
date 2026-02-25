@@ -8,9 +8,9 @@ import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import { useAdminCRUD } from "@/hooks/useAdminCRUD";
 import { generateSlug } from "@/utils/slug";
 import { parseTags } from "@/utils/tags";
-import type { BlogItem } from "@/types/admin";
+import type { NewsItem } from "@/types/admin";
 
-const empty: BlogItem = {
+const empty: NewsItem = {
   _id: "",
   title: "",
   slug: "",
@@ -19,24 +19,23 @@ const empty: BlogItem = {
   content: "",
   tags: [],
   coverImage: "",
-  readingTime: 0,
   published: false,
   url: "",
 };
 
-export default function BlogPage() {
+export default function NewsPage() {
   const [tagsInput, setTagsInput] = useState("");
 
   const {
     items, loading, editing, setEditing, deleting, setDeleting,
     showForm, handleSave, handleDelete, update, cancelEdit,
-  } = useAdminCRUD<BlogItem>({
-    resource: "blog",
+  } = useAdminCRUD<NewsItem>({
+    resource: "news",
     empty,
     onBeforeSave: (item) => ({ ...item, tags: parseTags(tagsInput) }),
   });
 
-  const startEdit = (item: BlogItem) => {
+  const startEdit = (item: NewsItem) => {
     setEditing({ ...item });
     setTagsInput((item.tags ?? []).join(", "));
   };
@@ -50,8 +49,8 @@ export default function BlogPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-accent">Blog Posts</h2>
-          <span className="text-fg-dim/40 text-xs font-mono">~/blog</span>
+          <h2 className="text-lg font-bold text-accent">News</h2>
+          <span className="text-fg-dim/40 text-xs font-mono">~/news</span>
         </div>
         <button
           onClick={startNew}
@@ -89,9 +88,6 @@ export default function BlogPage() {
               />
               Published
             </label>
-            {editing.readingTime ? (
-              <span className="text-xs text-fg-dim">~{editing.readingTime} min read</span>
-            ) : null}
           </div>
 
           <div className="flex gap-2 pt-2">
@@ -109,20 +105,20 @@ export default function BlogPage() {
         <DataTable
           columns={[
             { key: "title", label: "Title" },
-            { key: "date", label: "Date", render: (p) => <span className="text-fg-dim font-mono text-xs">{p.date}</span> },
-            { key: "tags", label: "Tags", render: (p) => (
+            { key: "date", label: "Date", render: (a) => <span className="text-fg-dim font-mono text-xs">{a.date}</span> },
+            { key: "tags", label: "Tags", render: (a) => (
               <div className="flex flex-wrap gap-1">
-                {(p.tags ?? []).map((t: string) => (
+                {(a.tags ?? []).map((t: string) => (
                   <span key={t} className="text-xs px-1.5 py-0.5 rounded bg-accent/10 text-accent">{t}</span>
                 ))}
               </div>
             )},
-            { key: "published", label: "Status", render: (p) => (
-              <span className={`text-xs font-medium ${p.published ? "text-t-green" : "text-fg-dim"}`}>
-                {p.published ? "Published" : "Draft"}
+            { key: "published", label: "Status", render: (a) => (
+              <span className={`text-xs font-medium ${a.published ? "text-t-green" : "text-fg-dim"}`}>
+                {a.published ? "Published" : "Draft"}
               </span>
             )},
-            { key: "summary", label: "Summary", render: (p) => <span className="line-clamp-1 text-fg-dim">{p.summary}</span> },
+            { key: "summary", label: "Summary", render: (a) => <span className="line-clamp-1 text-fg-dim">{a.summary}</span> },
           ]}
           data={items}
           onEdit={startEdit}
@@ -132,7 +128,7 @@ export default function BlogPage() {
 
       <ConfirmDialog
         open={!!deleting}
-        title="Delete Blog Post"
+        title="Delete News Article"
         message={`Are you sure you want to delete "${deleting?.title}"?`}
         onConfirm={handleDelete}
         onCancel={() => setDeleting(null)}

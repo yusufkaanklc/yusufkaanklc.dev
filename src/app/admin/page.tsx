@@ -13,7 +13,8 @@ export default function AdminDashboard() {
     Promise.all([
       fetch("/api/data").then((r) => r.json()),
       fetch("/api/admin/announcements").then((r) => r.json()),
-    ]).then(([data, announcements]) => {
+      fetch("/api/admin/news").then((r) => r.json()),
+    ]).then(([data, announcements, news]) => {
       setStats({
         projects: data.projects?.length ?? 0,
         blogPosts: data.blogPosts?.length ?? 0,
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
         certificates: data.certificates?.length ?? 0,
         socials: data.socials?.length ?? 0,
         announcements: Array.isArray(announcements) ? announcements.length : 0,
+        news: Array.isArray(news) ? news.length : 0,
       });
     });
   }, []);
@@ -32,6 +34,7 @@ export default function AdminDashboard() {
         { label: "Projects", count: stats.projects, href: "/admin/projects" },
         { label: "Blog Posts", count: stats.blogPosts, href: "/admin/blog" },
         { label: "Announcements", count: stats.announcements, href: "/admin/announcements" },
+        { label: "News", count: stats.news, href: "/admin/news" },
         { label: "Skill Categories", count: stats.skills, href: "/admin/skills" },
         { label: "Experiences", count: stats.experiences, href: "/admin/experience" },
         { label: "Education", count: stats.education, href: "/admin/education" },

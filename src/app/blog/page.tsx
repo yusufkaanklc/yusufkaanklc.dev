@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPosts } from "@/lib/fetchers";
-import { ThemeApplier } from "@/app/blog/[slug]/BlogClientParts";
+import { generateCollectionSchema, generateBreadcrumbs } from "@/lib/schema";
+import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
+import { TagList } from "@/components/ui/TagBadge";
 
 export const metadata: Metadata = {
   title: "Blog | Yusuf Kaan Kilic",
@@ -30,108 +32,47 @@ export const metadata: Metadata = {
 export default async function BlogListPage() {
   const posts = await getAllPosts();
 
-  const collectionLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Blog",
-    description:
-      "Blog posts about software engineering, web development, and technology by Yusuf Kaan Kilic.",
-    url: "https://yusufkaanklc.dev/blog",
-    author: {
-      "@type": "Person",
-      name: "Yusuf Kaan Kilic",
-      url: "https://yusufkaanklc.dev",
-    },
-  };
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://yusufkaanklc.dev",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: "https://yusufkaanklc.dev/blog",
-      },
-    ],
-  };
+  const schemas = [
+    generateCollectionSchema("Blog", "/blog", "Blog posts about software engineering, web development, and technology by Yusuf Kaan Kilic."),
+    generateBreadcrumbs([{ name: "Blog", path: "/blog" }]),
+  ];
 
   return (
-    <>
-      <ThemeApplier />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <div className="min-h-screen bg-bg-secondary text-fg font-mono">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <Link
-              href="/"
-              className="text-accent hover:underline text-sm mb-6 inline-block"
+    <ContentPageLayout backHref="/" backLabel="Back to terminal" schemas={schemas}>
+      <h1 className="text-2xl font-bold text-accent mb-2">Blog</h1>
+      <p className="text-fg-muted text-sm mb-8">
+        Posts about software engineering, web development, and technology.
+      </p>
+
+      {posts.length === 0 ? (
+        <p className="text-fg-dim">No published posts yet.</p>
+      ) : (
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <article
+              key={post.slug}
+              className="border border-fg-dim/20 rounded-lg p-4 hover:border-accent/40 transition-colors"
             >
-              &larr; Back to terminal
-            </Link>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-2">
+                <span>{post.date}</span>
+                <span className="text-fg-dim/40">|</span>
+                <span>{post.readingTime} min read</span>
+              </div>
 
-            <h1 className="text-2xl font-bold text-accent mb-2">Blog</h1>
-            <p className="text-fg-muted text-sm">
-              Posts about software engineering, web development, and technology.
-            </p>
-          </div>
+              <Link
+                href={`/blog/${post.slug}`}
+                className="text-accent hover:underline font-bold text-lg block mb-2"
+              >
+                {post.title}
+              </Link>
 
-          {posts.length === 0 ? (
-            <p className="text-fg-dim">No published posts yet.</p>
-          ) : (
-            <div className="space-y-6">
-              {posts.map((post) => (
-                <article
-                  key={post.slug}
-                  className="border border-fg-dim/20 rounded-lg p-4 hover:border-accent/40 transition-colors"
-                >
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-2">
-                    <span>{post.date}</span>
-                    <span className="text-fg-dim/40">|</span>
-                    <span>{post.readingTime} min read</span>
-                  </div>
+              <p className="text-fg-muted text-sm mb-3">{post.summary}</p>
 
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="text-accent hover:underline font-bold text-lg block mb-2"
-                  >
-                    {post.title}
-                  </Link>
-
-                  <p className="text-fg-muted text-sm mb-3">{post.summary}</p>
-
-                  {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/20"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
+              <TagList tags={post.tags} />
+            </article>
+          ))}
         </div>
-      </div>
-    </>
+      )}
+    </ContentPageLayout>
   );
 }

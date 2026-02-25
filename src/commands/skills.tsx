@@ -1,6 +1,7 @@
 import { registerCommand } from "@/core/commandRegistry";
 import { skillCategories as staticSkillCategories } from "@/data/skills";
 import { SkillBar } from "@/components/output/SkillBar";
+import { commandListOutput } from "@/utils/commandHelpers";
 
 registerCommand({
   name: "skills",
@@ -8,18 +9,9 @@ registerCommand({
   handler: (_args, context) => {
     const skillCategories = context.data?.skillCategories ?? staticSkillCategories;
     return {
-      output: [
-        {
-          id: `skills-header-${Date.now()}`,
-          type: "component",
-          component: <p className="text-accent font-bold mb-2">Technical Skills:</p>,
-        },
-        ...skillCategories.map((cat, i) => ({
-          id: `skill-${i}-${Date.now()}`,
-          type: "component" as const,
-          component: <SkillBar category={cat} />,
-        })),
-      ],
+      output: commandListOutput("skill", "Technical Skills:", skillCategories, (cat) => (
+        <SkillBar category={cat} />
+      )),
     };
   },
 });

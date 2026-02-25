@@ -71,6 +71,18 @@ export const profileSchema = z.object({
   resumeUrl: z.string().max(500).trim().default(""),
 });
 
+export const newsArticleSchema = z.object({
+  title: z.string().min(1).max(200).trim(),
+  slug: z.string().min(1).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be URL-safe (lowercase letters, numbers, hyphens)"),
+  date: z.string().min(1).max(50).trim(),
+  summary: z.string().min(1).max(1000).trim(),
+  content: z.string().max(50000).trim().optional(),
+  tags: z.array(z.string().min(1).max(50).trim()).max(10).default([]),
+  coverImage: z.string().url().max(500).optional().or(z.literal("")),
+  published: z.boolean().default(false),
+  url: z.string().url().max(500).optional().or(z.literal("")),
+});
+
 export const announcementSchema = z.object({
   title: z.string().min(1).max(200).trim(),
   slug: z.string().min(1).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be URL-safe (lowercase letters, numbers, hyphens)"),

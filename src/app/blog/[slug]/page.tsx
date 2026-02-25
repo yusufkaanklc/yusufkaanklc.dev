@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getPost } from "@/lib/fetchers";
-import { ThemeApplier, LikeButton, ShareButtons } from "./BlogClientParts";
+import { generateArticleSchema, generateBreadcrumbs } from "@/lib/schema";
+import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
+import { TagList } from "@/components/ui/TagBadge";
+import { ShareButtons } from "@/components/ui/ShareButtons";
+import { LikeButton } from "@/components/ui/LikeButton";
 
 export async function generateMetadata({
   params,
@@ -59,119 +62,60 @@ export default async function BlogDetailPage({
     notFound();
   }
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.summary,
-    datePublished: post.date,
-    author: {
-      "@type": "Person",
-      name: "Yusuf Kaan Kilic",
-      url: "https://yusufkaanklc.dev",
-    },
-    ...(post.coverImage && { image: post.coverImage }),
-    keywords: post.tags.join(", "),
-    url: `https://yusufkaanklc.dev/blog/${post.slug}`,
-  };
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://yusufkaanklc.dev",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: "https://yusufkaanklc.dev/blog",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: post.title,
-        item: `https://yusufkaanklc.dev/blog/${post.slug}`,
-      },
-    ],
-  };
+  const schemas = [
+    generateArticleSchema({
+      type: "BlogPosting",
+      title: post.title,
+      summary: post.summary,
+      date: post.date,
+      path: `/blog/${post.slug}`,
+      image: post.coverImage,
+      keywords: post.tags.join(", "),
+    }),
+    generateBreadcrumbs([
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: `/blog/${post.slug}` },
+    ]),
+  ];
 
   return (
-    <>
-      <ThemeApplier />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <div className="min-h-screen bg-bg-secondary text-fg font-mono">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              href="/blog"
-              className="text-accent hover:underline text-sm mb-6 inline-block"
-            >
-              &larr; Back to blog
-            </Link>
+    <ContentPageLayout backHref="/blog" backLabel="Back to blog" schemas={schemas}>
+      {post.coverImage && (
+        <img
+          src={post.coverImage}
+          alt={post.title}
+          className="w-full h-48 object-cover rounded-lg border border-fg-dim/20 mb-6"
+        />
+      )}
 
-            {post.coverImage && (
-              <img
-                src={post.coverImage}
-                alt={post.title}
-                className="w-full h-48 object-cover rounded-lg border border-fg-dim/20 mb-6"
-              />
-            )}
+      <h1 className="text-2xl font-bold text-accent mb-3">
+        {post.title}
+      </h1>
 
-            <h1 className="text-2xl font-bold text-accent mb-3">
-              {post.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-4">
-              <span>{post.date}</span>
-              <span className="text-fg-dim/40">|</span>
-              <span>{post.readingTime} min read</span>
-            </div>
-
-            {post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/20"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <p className="text-fg-muted text-sm border-l-2 border-accent/30 pl-3">
-              {post.summary}
-            </p>
-          </div>
-
-          {/* Content */}
-          {post.content && (
-            <article className="prose prose-invert max-w-none blog-content">
-              <ReactMarkdown>{post.content}</ReactMarkdown>
-            </article>
-          )}
-
-          {/* Engagement Bar */}
-          <div className="flex items-center justify-between border-t border-fg-dim/20 pt-6 mt-8">
-            <LikeButton slug={post.slug} />
-            <ShareButtons slug={post.slug} title={post.title} />
-          </div>
-        </div>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-4">
+        <span>{post.date}</span>
+        <span className="text-fg-dim/40">|</span>
+        <span>{post.readingTime} min read</span>
       </div>
-    </>
+
+      <div className="mb-4">
+        <TagList tags={post.tags} />
+      </div>
+
+      <p className="text-fg-muted text-sm border-l-2 border-accent/30 pl-3 mb-8">
+        {post.summary}
+      </p>
+
+      {post.content && (
+        <article className="prose prose-invert max-w-none blog-content">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </article>
+      )}
+
+      <div className="flex items-center justify-between border-t border-fg-dim/20 pt-6 mt-8">
+        <LikeButton slug={post.slug} />
+        <ShareButtons slug={post.slug} title={post.title} />
+      </div>
+    </ContentPageLayout>
   );
 }

@@ -9,6 +9,7 @@ import "./contact";
 import "./socials";
 import "./blog";
 import "./announcements";
+import "./news";
 import "./clear";
 import "./filesystem";
 import "./whoami";
