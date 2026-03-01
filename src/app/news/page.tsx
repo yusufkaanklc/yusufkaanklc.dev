@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { getAllNews } from "@/lib/fetchers";
+import { getNewsPaginated } from "@/lib/fetchers";
 import { generateCollectionSchema, generateBreadcrumbs } from "@/lib/schema";
 import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
-import { TagList } from "@/components/ui/TagBadge";
+import { NewsList } from "@/components/lists/NewsList";
 
 export const revalidate = 60;
 
@@ -30,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsListPage() {
-  const news = await getAllNews();
+  const { items, page, hasMore } = await getNewsPaginated(1);
 
   const schemas = [
     generateCollectionSchema("News", "/news", "Latest news and updates from Yusuf Kaan Kilic."),
@@ -44,33 +43,7 @@ export default async function NewsListPage() {
         Latest news and updates.
       </p>
 
-      {news.length === 0 ? (
-        <p className="text-fg-dim">No news yet.</p>
-      ) : (
-        <div className="space-y-6">
-          {news.map((article) => (
-            <article
-              key={article.slug}
-              className="border border-fg-dim/20 rounded-lg p-4 hover:border-accent/40 transition-colors"
-            >
-              <div className="flex flex-wrap items-center gap-3 text-xs text-fg-dim mb-2">
-                <span>{article.date}</span>
-              </div>
-
-              <Link
-                href={`/news/${article.slug}`}
-                className="text-accent hover:underline font-bold text-lg block mb-2"
-              >
-                {article.title}
-              </Link>
-
-              <p className="text-fg-muted text-sm mb-3">{article.summary}</p>
-
-              <TagList tags={article.tags} />
-            </article>
-          ))}
-        </div>
-      )}
+      <NewsList initialItems={items} initialPage={page} initialHasMore={hasMore} />
     </ContentPageLayout>
   );
 }

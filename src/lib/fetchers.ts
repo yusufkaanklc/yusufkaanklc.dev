@@ -5,9 +5,17 @@ import { NewsArticle } from "@/lib/models/News";
 import type { BlogPost as BlogPostType, Announcement as AnnouncementType, NewsArticle as NewsArticleType } from "@/types/models";
 import type { Model } from "mongoose";
 
-type BlogPostData = Omit<BlogPostType, "published">;
-type AnnouncementData = Omit<AnnouncementType, "published">;
-type NewsArticleData = Omit<NewsArticleType, "published">;
+export const PAGE_SIZE = 10;
+
+export type BlogPostData = Omit<BlogPostType, "published">;
+export type AnnouncementData = Omit<AnnouncementType, "published">;
+export type NewsArticleData = Omit<NewsArticleType, "published">;
+
+export interface PaginatedResult<T> {
+  items: T[];
+  page: number;
+  hasMore: boolean;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createListFetcher<T>(model: Model<any>, mapper: (doc: any) => T) {
@@ -18,6 +26,30 @@ function createListFetcher<T>(model: Model<any>, mapper: (doc: any) => T) {
       return items.map(mapper);
     } catch {
       return [];
+    }
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createPaginatedListFetcher<T>(model: Model<any>, mapper: (doc: any) => T) {
+  return async (page: number): Promise<PaginatedResult<T>> => {
+    try {
+      await connectDB();
+      const skip = (page - 1) * PAGE_SIZE;
+      const items = await model
+        .find({ published: true })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(PAGE_SIZE + 1)
+        .lean();
+      const hasMore = items.length > PAGE_SIZE;
+      return {
+        items: items.slice(0, PAGE_SIZE).map(mapper),
+        page,
+        hasMore,
+      };
+    } catch {
+      return { items: [], page, hasMore: false };
     }
   };
 }
@@ -110,3 +142,7 @@ export const getAnnouncement = createDetailFetcher<AnnouncementData>(Announcemen
 
 export const getAllNews = createListFetcher<NewsArticleData>(NewsArticle, mapNewsArticleList);
 export const getNewsArticle = createDetailFetcher<NewsArticleData>(NewsArticle, mapNewsArticle);
+
+export const getPostsPaginated = createPaginatedListFetcher<BlogPostData>(BlogPost, mapBlogPostList);
+export const getAnnouncementsPaginated = createPaginatedListFetcher<AnnouncementData>(Announcement, mapAnnouncementList);
+export const getNewsPaginated = createPaginatedListFetcher<NewsArticleData>(NewsArticle, mapNewsArticleList);
