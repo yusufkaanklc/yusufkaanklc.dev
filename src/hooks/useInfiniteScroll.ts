@@ -33,10 +33,11 @@ export function useInfiniteScroll<T>({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const restoredRef = useRef(false);
 
-  // Refs to always hold latest values (avoids stale closures in scroll listener)
+  // Refs to always hold latest values
   const itemsRef = useRef(items);
   const pageRef = useRef(page);
   const hasMoreRef = useRef(hasMore);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => { itemsRef.current = items; }, [items]);
   useEffect(() => { pageRef.current = page; }, [page]);
@@ -48,13 +49,6 @@ export function useInfiniteScroll<T>({
     restoredRef.current = true;
 
     try {
-      // On full page reload, clear cache so we start fresh
-      const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
-      if (navEntries.length > 0 && navEntries[0].type === "reload") {
-        sessionStorage.removeItem(cacheKey);
-        return;
-      }
-
       const raw = sessionStorage.getItem(cacheKey);
       if (!raw) return;
 
@@ -64,10 +58,17 @@ export function useInfiniteScroll<T>({
         setPage(cached.page);
         setHasMore(cached.hasMore);
 
-        // Double rAF for scroll restore after DOM paint
+        const targetScrollY = cached.scrollY;
+
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            window.scrollTo(0, cached.scrollY);
+            window.scrollTo(0, targetScrollY);
+
+            setTimeout(() => {
+              if (Math.abs(window.scrollY - targetScrollY) > 10) {
+                window.scrollTo(0, targetScrollY);
+              }
+            }, 100);
           });
         });
       }
@@ -76,17 +77,27 @@ export function useInfiniteScroll<T>({
     }
   }, [cacheKey]);
 
+  // Clear cache on actual page reload/close (beforeunload)
+  // Client-side SPA navigations do NOT trigger beforeunload
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      sessionStorage.removeItem(cacheKey);
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [cacheKey]);
+
   // Save to cache on scroll (debounced) and unmount
-  // Uses refs so this effect only mounts/unmounts once — no stale closure issues
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
-    const save = () => {
+    const save = (reason: string) => {
+      const scrollY = reason === "unmount" ? lastScrollYRef.current : window.scrollY;
       const entry: CacheEntry<T> = {
         items: itemsRef.current,
         page: pageRef.current,
         hasMore: hasMoreRef.current,
-        scrollY: window.scrollY,
+        scrollY,
       };
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify(entry));
@@ -96,15 +107,20 @@ export function useInfiniteScroll<T>({
     };
 
     const onScroll = () => {
+      // Don't track scrollY=0 — Next.js resets scroll to top before unmount,
+      // which would overwrite the real position
+      if (window.scrollY > 0) {
+        lastScrollYRef.current = window.scrollY;
+      }
       clearTimeout(timeout);
-      timeout = setTimeout(save, 150);
+      timeout = setTimeout(() => save("scroll"), 150);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       clearTimeout(timeout);
       window.removeEventListener("scroll", onScroll);
-      save();
+      save("unmount");
     };
   }, [cacheKey]);
 
