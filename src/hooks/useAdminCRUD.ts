@@ -54,7 +54,8 @@ export function useAdminCRUD<T extends WithId>({ resource, empty, onBeforeSave }
   };
 
   const startNew = () => {
-    setEditing({ ...empty });
+    const today = new Date().toISOString().slice(0, 10);
+    setEditing({ ...empty, ...(("date" in empty) ? { date: today } : {}) });
     setShowForm(true);
   };
 
@@ -71,6 +72,7 @@ export function useAdminCRUD<T extends WithId>({ resource, empty, onBeforeSave }
     deleting,
     setDeleting,
     showForm,
+    setShowForm,
     handleSave,
     handleDelete,
     update,

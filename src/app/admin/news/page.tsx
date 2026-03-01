@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Input, TextArea } from "@/components/admin/FormField";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { LoadingSkeleton } from "@/components/admin/LoadingSkeleton";
 import { useAdminCRUD } from "@/hooks/useAdminCRUD";
 import { generateSlug } from "@/utils/slug";
@@ -25,24 +26,33 @@ const empty: NewsItem = {
 
 export default function NewsPage() {
   const [tagsInput, setTagsInput] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     items, loading, editing, setEditing, deleting, setDeleting,
-    showForm, handleSave, handleDelete, update, cancelEdit,
+    showForm, setShowForm, handleSave, handleDelete, update, cancelEdit,
   } = useAdminCRUD<NewsItem>({
     resource: "news",
     empty,
     onBeforeSave: (item) => ({ ...item, tags: parseTags(tagsInput) }),
   });
 
+  const scrollToForm = () => {
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
   const startEdit = (item: NewsItem) => {
     setEditing({ ...item });
     setTagsInput((item.tags ?? []).join(", "));
+    setShowForm(true);
+    scrollToForm();
   };
 
   const startNew = () => {
-    setEditing({ ...empty });
+    setEditing({ ...empty, date: new Date().toISOString().slice(0, 10) });
     setTagsInput("");
+    setShowForm(true);
+    scrollToForm();
   };
 
   return (
@@ -61,7 +71,7 @@ export default function NewsPage() {
       </div>
 
       {showForm && editing && (
-        <form onSubmit={handleSave} className="admin-section space-y-5 admin-fade-in">
+        <form ref={formRef} onSubmit={handleSave} className="admin-section space-y-5 admin-fade-in">
           <Input label="Title" value={editing.title} onChange={(e) => {
             const title = e.target.value;
             setEditing((prev) => prev ? {
@@ -75,7 +85,11 @@ export default function NewsPage() {
           <TextArea label="Summary" value={editing.summary} onChange={update("summary")} required />
           <TextArea label="Content (Markdown)" value={editing.content ?? ""} onChange={update("content")} />
           <Input label="Tags (comma-separated)" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
-          <Input label="Cover Image URL" value={editing.coverImage ?? ""} onChange={update("coverImage")} />
+          <ImageUpload
+            value={editing.coverImage ?? ""}
+            onChange={(url) => setEditing((prev) => prev ? { ...prev, coverImage: url } : prev)}
+            category="news"
+          />
           <Input label="URL (external)" value={editing.url ?? ""} onChange={update("url")} />
 
           <div className="flex items-center gap-3">

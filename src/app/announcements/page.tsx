@@ -5,6 +5,8 @@ import { generateCollectionSchema, generateBreadcrumbs } from "@/lib/schema";
 import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
 import { priorityColors } from "@/utils/priority";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Announcements | Yusuf Kaan Kilic",
   description:

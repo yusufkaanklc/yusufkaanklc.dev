@@ -5,6 +5,8 @@ import { generateCollectionSchema, generateBreadcrumbs } from "@/lib/schema";
 import { ContentPageLayout } from "@/components/ui/ContentPageLayout";
 import { TagList } from "@/components/ui/TagBadge";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Blog | Yusuf Kaan Kilic",
   description:

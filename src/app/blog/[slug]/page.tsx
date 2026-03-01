@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { getPost } from "@/lib/fetchers";
 import { generateArticleSchema, generateBreadcrumbs } from "@/lib/schema";
@@ -21,6 +22,11 @@ export async function generateMetadata({
   }
 
   const baseUrl = "https://yusufkaanklc.dev";
+  const ogImage = post.coverImage
+    ? post.coverImage.startsWith("/")
+      ? `${baseUrl}${post.coverImage}`
+      : post.coverImage
+    : undefined;
 
   return {
     title: `${post.title} | Yusuf Kaan Kilic`,
@@ -36,13 +42,13 @@ export async function generateMetadata({
       locale: "en_US",
       publishedTime: post.date,
       tags: post.tags,
-      ...(post.coverImage && { images: [{ url: post.coverImage }] }),
+      ...(ogImage && { images: [{ url: ogImage }] }),
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
-      ...(post.coverImage && { images: [post.coverImage] }),
+      ...(ogImage && { images: [ogImage] }),
     },
     alternates: {
       canonical: `${baseUrl}/blog/${post.slug}`,
@@ -81,10 +87,15 @@ export default async function BlogDetailPage({
   return (
     <ContentPageLayout backHref="/blog" backLabel="Back to blog" schemas={schemas}>
       {post.coverImage && (
-        <img
+        <Image
           src={post.coverImage}
           alt={post.title}
-          className="w-full h-48 object-cover rounded-lg border border-fg-dim/20 mb-6"
+          width={1200}
+          height={675}
+          sizes="(max-width: 768px) 100vw, 800px"
+          priority
+          className="w-full aspect-video object-cover rounded-lg border border-fg-dim/20 mb-6"
+          unoptimized
         />
       )}
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { getNewsArticle } from "@/lib/fetchers";
 import { generateArticleSchema, generateBreadcrumbs } from "@/lib/schema";
@@ -20,6 +21,11 @@ export async function generateMetadata({
   }
 
   const baseUrl = "https://yusufkaanklc.dev";
+  const ogImage = article.coverImage
+    ? article.coverImage.startsWith("/")
+      ? `${baseUrl}${article.coverImage}`
+      : article.coverImage
+    : undefined;
 
   return {
     title: `${article.title} | Yusuf Kaan Kilic`,
@@ -34,13 +40,13 @@ export async function generateMetadata({
       type: "article",
       locale: "en_US",
       publishedTime: article.date,
-      ...(article.coverImage ? { images: [{ url: article.coverImage }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.summary,
-      ...(article.coverImage ? { images: [article.coverImage] } : {}),
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
     alternates: {
       canonical: `${baseUrl}/news/${article.slug}`,
@@ -77,6 +83,19 @@ export default async function NewsDetailPage({
 
   return (
     <ContentPageLayout backHref="/news" backLabel="Back to news" schemas={schemas}>
+      {article.coverImage && (
+        <Image
+          src={article.coverImage}
+          alt={article.title}
+          width={1200}
+          height={675}
+          sizes="(max-width: 768px) 100vw, 800px"
+          priority
+          className="w-full aspect-video object-cover rounded-lg border border-fg-dim/20 mb-6"
+          unoptimized
+        />
+      )}
+
       <h1 className="text-2xl font-bold text-accent mb-3">
         {article.title}
       </h1>
@@ -85,30 +104,20 @@ export default async function NewsDetailPage({
         <span>{article.date}</span>
       </div>
 
+      {article.tags.length > 0 && (
+        <div className="mb-4">
+          <TagList tags={article.tags} />
+        </div>
+      )}
+
       <p className="text-fg-muted text-sm border-l-2 border-accent/30 pl-3 mb-8">
         {article.summary}
       </p>
-
-      {article.coverImage && (
-        <div className="mb-8 rounded-lg overflow-hidden border border-fg-dim/20">
-          <img
-            src={article.coverImage}
-            alt={article.title}
-            className="w-full h-auto"
-          />
-        </div>
-      )}
 
       {article.content && (
         <article className="prose prose-invert max-w-none blog-content">
           <ReactMarkdown>{article.content}</ReactMarkdown>
         </article>
-      )}
-
-      {article.tags.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-fg-dim/20">
-          <TagList tags={article.tags} />
-        </div>
       )}
 
       {article.url && (

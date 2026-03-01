@@ -7,7 +7,7 @@ export const blogPostSchema = z.object({
   summary: z.string().min(1).max(1000).trim(),
   content: z.string().max(50000).trim().optional(),
   tags: z.array(z.string().min(1).max(50).trim()).max(10).default([]),
-  coverImage: z.string().url().max(500).optional().or(z.literal("")),
+  coverImage: z.string().max(500).optional().or(z.literal("")),
   readingTime: z.number().min(1).optional(),
   published: z.boolean().default(false),
   url: z.string().url().max(500).optional().or(z.literal("")),
@@ -78,7 +78,7 @@ export const newsArticleSchema = z.object({
   summary: z.string().min(1).max(1000).trim(),
   content: z.string().max(50000).trim().optional(),
   tags: z.array(z.string().min(1).max(50).trim()).max(10).default([]),
-  coverImage: z.string().url().max(500).optional().or(z.literal("")),
+  coverImage: z.string().max(500).optional().or(z.literal("")),
   published: z.boolean().default(false),
   url: z.string().url().max(500).optional().or(z.literal("")),
 });
