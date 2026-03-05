@@ -8,7 +8,7 @@ export const blogPostSchema = z.object({
   content: z.string().max(50000).trim().optional(),
   tags: z.array(z.string().min(1).max(50).trim()).max(10).default([]),
   coverImage: z.string().max(500).optional().or(z.literal("")),
-  readingTime: z.number().min(1).optional(),
+  readingTime: z.number().optional(),
   published: z.boolean().default(false),
   url: z.string().url().max(500).optional().or(z.literal("")),
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 interface WithId {
   _id: string;
@@ -16,6 +16,8 @@ export function useAdminCRUD<T extends WithId>({ resource, empty, onBeforeSave }
   const [editing, setEditing] = useState<T | null>(null);
   const [deleting, setDeleting] = useState<T | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(() => {
     fetch(`/api/admin/${resource}`)
@@ -29,10 +31,20 @@ export function useAdminCRUD<T extends WithId>({ resource, empty, onBeforeSave }
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    setError(null);
     const payload = onBeforeSave ? onBeforeSave(editing) : editing;
     const method = editing._id ? "PUT" : "POST";
     const url = editing._id ? `/api/admin/${resource}/${editing._id}` : `/api/admin/${resource}`;
-    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      const msg = data?.error
+        ? typeof data.error === "string" ? data.error : JSON.stringify(data.error)
+        : `Save failed (${res.status})`;
+      setError(msg);
+      setTimeout(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+      return;
+    }
     setEditing(null);
     setShowForm(false);
     load();
@@ -73,6 +85,8 @@ export function useAdminCRUD<T extends WithId>({ resource, empty, onBeforeSave }
     setDeleting,
     showForm,
     setShowForm,
+    error,
+    errorRef,
     handleSave,
     handleDelete,
     update,

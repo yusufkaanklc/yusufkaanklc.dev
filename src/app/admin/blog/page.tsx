@@ -31,7 +31,7 @@ export default function BlogPage() {
 
   const {
     items, loading, editing, setEditing, deleting, setDeleting,
-    showForm, setShowForm, handleSave, handleDelete, update, cancelEdit,
+    showForm, setShowForm, error, errorRef, handleSave, handleDelete, update, cancelEdit,
   } = useAdminCRUD<BlogItem>({
     resource: "blog",
     empty,
@@ -107,6 +107,12 @@ export default function BlogPage() {
               <span className="text-xs text-fg-dim">~{editing.readingTime} min read</span>
             ) : null}
           </div>
+
+          {error && (
+            <div ref={errorRef} className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="flex gap-2 pt-2">
             <button type="submit" className="px-5 py-2.5 text-sm rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all font-medium">
